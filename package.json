@@ -1,9 +1,14 @@
 {
   "name": "qa-loop",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
+  "description": "Text-only coding agent + multimodal QA critic in a render→critique→repair loop.",
   "scripts": {
-    "build": "node --import tsx/esm --env-file=.env build-with-qa.ts"
+    "qa": "node --import tsx/esm --env-file=.env src/cli.ts",
+    "stress": "node --import tsx/esm --env-file=.env src/cli.ts --suite suite.json --concurrency 3",
+    "test": "node --import tsx/esm --test test/unit.test.ts test/render.test.ts",
+    "setup": "npm install && npx playwright install chromium"
   },
   "dependencies": {
     "playwright": "^1.49.0"

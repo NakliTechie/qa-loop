@@ -4,9 +4,12 @@ node_modules/
 .env
 .env.*
 
-# scratch run artifacts at repo root (curated copies live in outputs/ assets/ logs/)
+# scratch run output (curated copies are published under stress/)
+runs/
+
+# scratch artifacts / logs at repo root
 /out.html
 /round-*.png
 /round-*.html
 /report-*.json
-/run*.log
+/*.log

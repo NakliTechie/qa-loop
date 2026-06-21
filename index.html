@@ -71,6 +71,7 @@
     routed via OpenRouter / TokenRouter. Built off the
     <a href="https://x.com/i/article/2067849694232080384">Design Arena GLM-5.2 teardown</a>.
   </p>
+  <p class="meta" style="margin-top:6px">Source &amp; harness: <a href="https://github.com/NakliTechie/qa-loop"><b>github.com/NakliTechie/qa-loop ↗</b></a></p>
 </div></header>
 
 <main class="wrap">
@@ -84,7 +85,7 @@
   </div>
   <p>
     <a class="btn" href="outputs/tidepool.html">▶ Open the generated page (live)</a>
-    <a class="btn ghost" href="build-with-qa.ts">View the harness (≈200 lines)</a>
+    <a class="btn ghost" href="https://github.com/NakliTechie/qa-loop">★ View the repo on GitHub</a>
   </p>
 
   <h2>The idea</h2>
@@ -188,14 +189,18 @@
   </ol>
 
   <h2>Run it yourself</h2>
-  <p>The whole harness is one ~200-line file: <a href="build-with-qa.ts">build-with-qa.ts</a>. It’s
+  <p>The harness is a small, modular TypeScript CLI — the engine is
+  <a href="https://github.com/NakliTechie/qa-loop/blob/main/src/loop.ts">src/loop.ts</a>, the command-line
+  front end is <a href="https://github.com/NakliTechie/qa-loop/blob/main/src/cli.ts">src/cli.ts</a>. It’s
   provider-agnostic (OpenAI-compatible) — point it at OpenRouter, TokenRouter, or a self-hosted
   vLLM/SGLang endpoint to run entirely on your own GPUs.</p>
-  <pre><code>npm install &amp;&amp; npx playwright install chromium
+  <pre><code>npm run setup                      # install deps + Chromium
 
-# set CODER_MODEL / QA_MODEL / *_URL / OPENAI_API_KEY in a .env, then:
-node --import tsx/esm --env-file=.env build-with-qa.ts \
-  "a landing page for a specialty coffee subscription"</code></pre>
+# one prompt → runs/&lt;slug&gt;/ (page.html, screenshots, result.json):
+npm run qa -- "a landing page for a coffee subscription"
+
+# a whole suite, in parallel, with a metrics summary:
+npm run stress                     # suite.json → runs/summary.md</code></pre>
   <p>
     <span class="pill">coder · z-ai/glm-5.2</span>
     <span class="pill">critic · z-ai/glm-4.6v</span>

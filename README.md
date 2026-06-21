@@ -28,15 +28,22 @@ at 46,098 chars.
 ## Run it
 
 ```bash
-npm install && npx playwright install chromium
+npm run setup                                  # install deps + Chromium
 
-# put CODER_MODEL / QA_MODEL / CODER_URL / QA_URL / OPENAI_API_KEY in a .env (gitignored), then:
-node --import tsx/esm --env-file=.env build-with-qa.ts "a landing page for a coffee subscription"
+# put CODER_MODEL / QA_MODEL / CODER_URL / QA_URL / OPENAI_API_KEY in a .env, then:
+npm run qa -- "a landing page for a coffee subscription"   # one prompt
+npm run stress                                 # a whole suite (suite.json) → runs/summary.md
+npm test                                       # no-API smoke tests
 ```
 
-The harness ([`build-with-qa.ts`](build-with-qa.ts)) is ~200 lines and provider-agnostic
-(OpenAI-compatible) — point it at OpenRouter, TokenRouter, or a self-hosted vLLM/SGLang endpoint to run
-entirely on your own GPUs.
+Provider-agnostic (OpenAI-compatible): point `CODER_URL` / `QA_URL` at OpenRouter, TokenRouter, or a
+self-hosted vLLM/SGLang endpoint to run entirely on your own GPUs. Flags: `--coder`, `--critic`,
+`--cheap-critic <model>` (screen cheap, escalate only on borderline verdicts), `--rounds`,
+`--concurrency`, `--out`.
+
+**Layout** — [`src/loop.ts`](src/loop.ts) is the engine (render + coder + critic + the loop, with
+cost/latency/token metrics); [`src/cli.ts`](src/cli.ts) is the CLI / batch runner; [`suite.json`](suite.json)
+is the stress suite; each run writes `runs/<slug>/` (page.html, per-round screenshots, `result.json`).
 
 | Role | Model | Notes |
 |------|-------|-------|
