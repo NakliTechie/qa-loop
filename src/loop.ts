@@ -2,6 +2,7 @@
 // A text-only coder + multimodal vision critic in a generate→render→critique→repair loop.
 // Pure: runLoop() does no file IO — it returns html, the final report, per-round screenshots, and metrics.
 import { chromium, type Browser } from 'playwright';
+import { loadTaste } from './taste.ts';
 
 export interface ModelCfg { baseUrl: string; model: string; key: string; maxTok: number; }
 export interface RunConfig {
@@ -101,15 +102,19 @@ const CODER_SYS = `You generate a SINGLE self-contained HTML file (inline <style
 - Prefer proven "expert template" structures; nail the above-the-fold hero.
 - If you use chart.js / three.js, wire them so they ACTUALLY render (init after DOM, real data, a real new Chart()/scene).
 - Use real external CDN images (images.unsplash.com), not empty boxes.
-- NO purple gradients, no generic-AI look. Tasteful, specific, modern.
 - Keep internal planning brief — spend the budget on the complete HTML.
 Return ONLY the HTML, starting with <!doctype html>.`;
+// Aesthetic/taste rules (no purple gradients, etc.) come from the standing-intent profile, injected below.
 
 const PATCH_SYS = `You are FIXING an existing HTML page. You get the current full HTML plus a numbered list of fixes from a visual QA review.
 - Apply EVERY fix. Change ONLY what they require; preserve all other markup, copy, styling, scripts EXACTLY — do not drop working sections.
 - If a fix says a chart/widget didn't render, ADD the real init JS (e.g. an actual new Chart(...) wired to the canvas).
 - Keep Tailwind + real CDN images; no purple gradients.
 Return the COMPLETE corrected HTML, starting with <!doctype html>. Output ONLY the HTML.`;
+
+// Standing-intent profile — taste lives in ~/.taste/profile.md, shared with every other harness.
+const TASTE = loadTaste(['design', 'code', 'frontend', 'writing']);
+const tasteBlock = TASTE ? `\n\nStanding preferences (honor unless the prompt overrides):\n${TASTE}` : '';
 
 export const stripToHtml = (s: string) => {
   const m = s.match(/<!doctype html[\s\S]*<\/html>/i) || s.match(/```html?\n([\s\S]*?)```/i);
@@ -166,11 +171,11 @@ export async function runLoop(prompt: string, cfg: RunConfig): Promise<RunResult
       log(`round ${round}: ${mode} generate (${cfg.coder.model})`);
       const gen = mode === 'patch'
         ? await chat(cfg.coder, [
-            { role: 'system', content: PATCH_SYS },
+            { role: 'system', content: PATCH_SYS + tasteBlock },
             { role: 'user', content: `Original request (context): ${prompt}\n\nFixes to apply:\n${fixes}\n\nCURRENT HTML — return the full corrected version:\n\n${prevHtml}` },
           ], 0.4)
         : await chat(cfg.coder, [
-            { role: 'system', content: CODER_SYS },
+            { role: 'system', content: CODER_SYS + tasteBlock },
             { role: 'user', content: prompt },
           ], 0.7);
       usage.coderIn += gen.inTok; usage.coderOut += gen.outTok;

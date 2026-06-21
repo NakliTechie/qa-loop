@@ -48,6 +48,11 @@ self-hosted vLLM/SGLang endpoint to run entirely on your own GPUs. Flags: `--cod
 cost/latency/token metrics); [`src/cli.ts`](src/cli.ts) is the CLI / batch runner; [`suite.json`](suite.json)
 is the stress suite; each run writes `runs/<slug>/` (page.html, per-round screenshots, `result.json`).
 
+**Taste profile (optional)** — the coder's aesthetic rules (e.g. "no purple gradients") aren't hardcoded;
+they're loaded at runtime from a shared `~/.taste/profile.md` via [`src/taste.ts`](src/taste.ts) (a vendored
+~35-line loader). Set one once and every harness that reads it stays consistent; with no profile present the
+coder falls back to its built-in prompt. See [NakliTechie/explorations → standing-intent](https://github.com/NakliTechie/explorations).
+
 | Role | Model | Notes |
 |------|-------|-------|
 | Coder | `z-ai/glm-5.2` | text-only, MIT-licensed |
