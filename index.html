@@ -186,6 +186,45 @@
     </tbody>
   </table>
 
+  <h2>Stress test — where it holds, where it breaks</h2>
+  <p>Seven prompts spanning the categories the benchmark tracks, run through the production CLI on the
+  open GLM-5.2 + GLM-4.6V stack (concurrency 3). <b>5 of 7 passed</b> — total <b>$1.14</b>, ~20 min wall.
+  (Open any result from the <a href="#examples">examples above</a>.)</p>
+  <table>
+    <thead><tr><th>Prompt</th><th>Verdict</th><th>Rounds</th><th>Time</th><th>Cost</th><th>widgets</th><th>fidelity</th></tr></thead>
+    <tbody>
+      <tr><td><a href="stress/landing-saas/">SaaS landing</a></td><td class="pass">✓ pass</td><td>1</td><td>307s</td><td>$0.10</td><td>4</td><td>5</td></tr>
+      <tr><td><a href="stress/dashboard-multichart/">Analytics dashboard (4 charts)</a></td><td class="pass">✓ pass</td><td>1</td><td>329s</td><td>$0.09</td><td>5</td><td>5</td></tr>
+      <tr><td><a href="stress/dataviz-report/">Data report (4 viz)</a></td><td class="pass">✓ pass</td><td>1</td><td>316s</td><td>$0.10</td><td>5</td><td>5</td></tr>
+      <tr><td><a href="stress/portfolio-gallery/">Photo portfolio</a></td><td class="pass">✓ pass</td><td>1</td><td>348s</td><td>$0.11</td><td>5</td><td>5</td></tr>
+      <tr><td><a href="stress/pricing-toggle/">Pricing toggle</a></td><td class="pass">✓ pass</td><td>1</td><td>293s</td><td>$0.08</td><td>5</td><td>5</td></tr>
+      <tr><td><a href="stress/threejs-product/">three.js 3D product</a></td><td class="fail">✗ fail</td><td>4</td><td>1184s</td><td>$0.39</td><td>2</td><td>3</td></tr>
+      <tr><td><a href="stress/game-breakout/">Breakout game (canvas)</a></td><td class="fail">✗ fail</td><td>4</td><td>757s</td><td>$0.27</td><td>2</td><td>2</td></tr>
+    </tbody>
+  </table>
+  <p>Two clean clusters emerge:</p>
+  <ul class="clean">
+    <li><b>Static-ish</b> (landing, dashboard, data-viz, portfolio, pricing) — pass on the <b>first round</b>,
+    ~$0.09 and ~5 min each. Even four Chart.js charts and a nine-photo gallery are no trouble: they render in
+    a single frame, so the critic can verify them and the coder gets them right first try.</li>
+    <li><b>Interactive / 3D</b> (three.js, canvas game) — <b>fail after all four rounds</b>, ~$0.33 each. Note
+    the failure <i>shape</i>: <code>renders / styled / layout / images</code> all 5, but <code>widgets</code>
+    stuck at 2. The page around it is fine; the live thing inside never drew.</li>
+  </ul>
+  <p>Two compounding reasons, one per half of the loop:</p>
+  <ol class="steps">
+    <li><b>The coder struggles.</b> A correct three.js scene (camera, lights, geometry, controls) or a real
+    game loop is far harder to one-shot than declarative HTML + Chart.js.</li>
+    <li><b>The critic is single-frame.</b> One still screenshot can’t confirm an animated or interactive scene —
+    a 3D canvas caught mid-init, or a game before first paint, reads as blank. The critic honestly scores
+    <code>widgets 2</code>, and the loop can’t repair what it can’t reliably perceive.</li>
+  </ol>
+  <p>So the competence boundary isn’t “hard pages” — it’s <b>verifiability in a single frame</b>. The loop is
+  production-ready for static pages, charts, image layouts, and forms; interactive 3D and games need a richer
+  capture before the critic can grade them honestly — <b>multi-frame / short video, an interaction script run
+  before the shot, or a console-error signal</b>. Which is the harness lesson again, one level up: the critic
+  is only ever as good as what the capture shows it.</p>
+
   <h2>The QA checklist</h2>
   <p>The critic grades the screenshot on the failure modes a text coder is blind to — derived from the
   error cases behind the benchmark results:</p>
