@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing — Foundry</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F4F0E8;
+    --paper-2: #ECE6D9;
+    --ink: #1A1815;
+    --ink-soft: #4A4640;
+    --muted: #8A857B;
+    --line: #DDD5C5;
+    --accent: #B8451F;
+    --accent-soft: #F2D9CC;
+    --accent-tint: #F2A98E;
+    --gold: #C8902E;
+    --card: #FFFFFF;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
+
+  /* Paper grain */
+  .grain::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0 0.07 0 0 0 0.09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.55; pointer-events: none; z-index: 1; mix-blend-mode: multiply;
+  }
+
+  /* Toggle */
+  .toggle-track {
+    width: 58px; height: 32px; border-radius: 999px;
+    background: var(--ink); position: relative; cursor: pointer;
+    transition: background .3s;
+    flex-shrink: 0;
+  }
+  .toggle-knob {
+    position: absolute; top: 3px; left: 3px;
+    width: 26px; height: 26px; border-radius: 999px;
+    background: var(--paper);
+    transition: transform .35s cubic-bezier(.6,.2,.2,1);
+    box-shadow: 0 2px 5px rgba(0,0,0,.2);
+  }
+  .toggle-track.annual { background: var(--accent); }
+  .toggle-track.annual .toggle-knob { transform: translateX(26px); }
+
+  /* Price flip */
+  .price-num {
+    display: inline-block;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .price-num.flipping { opacity: 0; transform: translateY(8px); }
+
+  /* Cards */
+  .plan-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    transition: transform .45s cubic-bezier(.2,.7,.2,1), box-shadow .45s, border-color .3s;
+  }
+  .plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 22px 50px -24px rgba(26,24,21,.22);
+  }
+  .plan-card.featured {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+    box-shadow: 0 35px 70px -32px rgba(26,24,21,.5);
+  }
+  .plan-card.featured:hover { transform: translateY(-7px); }
+
+  .feature-li { display: flex; gap: .75rem; align-items: flex-start; }
+  .check {
+    flex-shrink: 0; width: 18px; height: 18px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 9px; margin-top: 4px;
+  }
+  .plan-card.featured .check { background: rgba(184,69,31,.28); color: var(--accent-tint); }
+
+  /* FAQ */
+  .faq-item { border-bottom: 1px solid var(--line); }
+  .faq-item:first-child { border-top: 1px solid var(--line); }
+  .faq-q { cursor: pointer; padding: 1.5rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+  .faq-a { max-height: 0; overflow: hidden; transition: max-height .55s cubic-bezier(.2,.7,.2,1); }
+  .faq-item.open .faq-a { max-height: 400px; }
+  .faq-item.open .faq-icon { transform: rotate(45deg); }
+  .faq-item.open .faq-q { color: var(--accent); }
+  .faq-icon { transition: transform .4s cubic-bezier(.2,.7,.2,1); color: var(--muted); }
+  .faq-item.open .faq-icon { color: var(--accent); }
+
+  /* Buttons */
+  .btn-primary {
+    background: var(--ink); color: var(--paper);
+    border-radius: 999px; padding: .85rem 1.5rem;
+    font-weight: 500; transition: all .25s;
+    display: inline-flex; align-items: center; gap: .5rem;
+  }
+  .btn-primary:hover { background: var(--accent); transform: translateY(-1px); }
+  .btn-ghost {
+    border: 1px solid var(--ink); color: var(--ink);
+    border-radius: 999px; padding: .85rem 1.5rem;
+    font-weight: 500; transition: all .25s;
+    display: inline-flex; align-items: center; gap: .5rem;
+  }
+  .btn-ghost:hover { background: var(--ink); color: var(--paper); }
+  .btn-on-dark {
+    background: var(--paper); color: var(--ink);
+    border-radius: 999px; padding: .85rem 1.5rem;
+    font-weight: 500; transition: all .25s;
+    display: inline-flex; align-items: center; gap: .5rem;
+  }
+  .btn-on-dark:hover { background: var(--accent); color: var(--paper); transform: translateY(-1px); }
+  .btn-outline-dark {
+    border: 1px solid rgba(244,240,232,.3); color: var(--paper);
+    border-radius: 999px; padding: .85rem 1.5rem;
+    font-weight: 500; transition: all .25s;
+    display: inline-flex; align-items: center; gap: .5rem;
+  }
+  .btn-outline-dark:hover { background: rgba(244,240,232,.1); border-color: var(--paper); }
+
+  /* Badges */
+  .badge-pop {
+    background: var(--accent); color: #FFF;
+    font-size: 11px; font-weight: 600; letter-spacing: .09em;
+    padding: 5px 12px; border-radius: 999px; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .badge-save {
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 11px; font-weight: 600;
+    padding: 3px 9px; border-radius: 999px;
+  }
+
+  /* Reveal */
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity .9s ease, transform .9s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* Nav */
+  .nav-blur { backdrop-filter: blur(12px); background: rgba(244,240,232,.82); }
+
+  /* Toggle labels */
+  .tl-active { color: var(--ink); font-weight: 600; }
+  .tl-inactive { color: var(--muted); font-weight: 500; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body class="grain">
+
+<!-- Nav -->
+<header class="sticky top-0 z-50 nav-blur border-b border-[#DDD5C5]/70">
+  <nav class="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2.5">
+      <span class="w-8 h-8 rounded-md bg-[#1A1815] text-[#F4F0E8] flex items-center justify-center font-display font-bold">F</span>
+      <span class="font-display text-xl font-semibold tracking-tight">Foundry</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm text-[#4A4640]">
+      <a href="#" class="hover:text-[#1A1815] transition-colors">Product</a>
+      <a href="#" class="hover:text-[#1A1815] transition-colors">Templates</a>
+      <a href="#" class="hover:text-[#1A1815] transition-colors">Customers</a>
+      <a href="#" class="text-[#1A1815] font-medium">Pricing</a>
+      <a href="#" class="hover:text-[#1A1815] transition-colors">Changelog</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="#" class="hidden sm:inline text-sm text-[#4A4640] hover:text-[#1A1815]">Sign in</a>
+      <a href="#" class="btn-primary text-sm py-2 px-4">Start free trial</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Hero + Pricing -->
+<section class="relative z-10 pt-20 pb-24 px-6 lg:px-10">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex justify-center mb-6 reveal">
+      <span class="inline-flex items-center gap-3 text-xs tracking-[0.2em] uppercase text-[#8A857B]">
+        <span class="w-8 h-px bg-[#8A857B]"></span>
+        Pricing · 2025
+        <span class="w-8 h-px bg-[#8A857B]"></span>
+      </span>
+    </div>
+
+    <h1 class="font-display text-center text-5xl md:text-7xl font-light tracking-tight leading-[0.95] reveal">
+      Pricing that scales<br>
+      <em class="italic font-normal text-[#B8451F]">with your craft.</em>
+    </h1>
+    <p class="text-center text-[#4A4640] mt-6 max-w-xl mx-auto text-lg reveal">
+      Simple, transparent plans for independent makers and growing studios. No setup fees, no per-seat surprises.
+    </p>
+
+    <!-- Toggle -->
+    <div class="flex items-center justify-center gap-4 mt-10 reveal">
+      <span id="label-monthly" class="text-sm tl-active">Monthly</span>
+      <div id="billing-toggle" class="toggle-track" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle annual billing">
+        <div class="toggle-knob"></div>
+      </div>
+      <span id="label-annual" class="text-sm tl-inactive flex items-center gap-2">
+        Annual <span class="badge-save">Save 20%</span>
+      </span>
+    </div>
+
+    <!-- Plans -->
+    <div class="grid md:grid-cols-3 gap-6 mt-14 items-stretch">
+      <!-- Starter -->
+      <div class="plan-card p-8 flex flex-col reveal">
+        <div class="flex items-center justify-between mb-1">
+          <h3 class="font-display text-2xl font-medium">Starter</h3>
+          <span class="text-xs text-[#8A857B] tracking-widest">01</span>
+        </div>
+        <p class="text-sm text-[#4A4640] mb-6">For solo makers shipping their first projects.</p>
+        <div class="flex items-baseline gap-1 mb-1">
+          <span class="font-display text-5xl font-medium">$<span class="price-num" data-monthly="24" data-annual="19">24</span></span>
+          <span class="text-[#8A857B] text-sm">/mo</span>
+        </div>
+        <p class="text-xs text-[#8A857B] mb-7 billing-note">Billed monthly</p>
+        <a href="#" class="btn-ghost w-full justify-center mb-8">Start free for 14 days</a>
+        <div class="text-xs uppercase tracking-[0.18em] text-[#8A857B] mb-4">Includes</div>
+        <ul class="space-y-3 text-sm flex-1">
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>3 active projects</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>5 GB asset storage</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Community support</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Basic analytics dashboard</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Custom domain support</span></li>
+        </ul>
+      </div>
+
+      <!-- Studio (Featured) -->
+      <div class="plan-card featured p-8 flex flex-col reveal md:-mt-4 md:mb-4 relative">
+        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
+          <span class="badge-pop">Most popular</span>
+        </div>
+        <div class="flex items-center justify-between mb-1">
+          <h3 class="font-display text-2xl font-medium">Studio</h3>
+          <span class="text-xs text-[#8A857B] tracking-widest">02</span>
+        </div>
+        <p class="text-sm text-[#C9C2B3] mb-6">For small teams collaborating on client work.</p>
+        <div class="flex items-baseline gap-1 mb-1">
+          <span class="font-display text-5xl font-medium">$<span class="price-num" data-monthly="59" data-annual="47">59</span></span>
+          <span class="text-[#8A857B] text-sm">/mo</span>
+        </div>
+        <p class="text-xs text-[#8A857B] mb-7 billing-note">Billed monthly</p>
+        <a href="#" class="btn-on-dark w-full justify-center mb-8">Start free for 14 days</a>
+        <div class="text-xs uppercase tracking-[0.18em] text-[#8A857B] mb-4">Everything in Starter, plus</div>
+        <ul class="space-y-3 text-sm flex-1">
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Unlimited projects</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>100 GB asset storage</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>5 team seats included</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Priority email support</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Advanced analytics &amp; reports</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Version history (90 days)</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Brand kit &amp; shared assets</span></li>
+        </ul>
+      </div>
+
+      <!-- Scale -->
+      <div class="plan-card p-8 flex flex-col reveal">
+        <div class="flex items-center justify-between mb-1">
+          <h3 class="font-display text-2xl font-medium">Scale</h3>
+          <span class="text-xs text-[#8A857B] tracking-widest">03</span>
+        </div>
+        <p class="text-sm text-[#4A4640] mb-6">For agencies managing multiple brands.</p>
+        <div class="flex items-baseline gap-1 mb-1">
+          <span class="font-display text-5xl font-medium">$<span class="price-num" data-monthly="149" data-annual="119">149</span></span>
+          <span class="text-[#8A857B] text-sm">/mo</span>
+        </div>
+        <p class="text-xs text-[#8A857B] mb-7 billing-note">Billed monthly</p>
+        <a href="#" class="btn-ghost w-full justify-center mb-8">Start free for 14 days</a>
+        <div class="text-xs uppercase tracking-[0.18em] text-[#8A857B] mb-4">Everything in Studio, plus</div>
+        <ul class="space-y-3 text-sm flex-1">
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>1 TB asset storage</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Unlimited team seats</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Dedicated success manager</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>SSO &amp; SAML provisioning</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Audit logs &amp; compliance exports</span></li>
+          <li class="feature-li"><span class="check"><i class="fa-solid fa-check"></i></span><span>Custom integrations &amp; API access</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Trust strip -->
+    <div class="mt-20 flex flex-col items-center reveal">
+      <p class="text-xs uppercase tracking-[0.2em] text-[#8A857B] mb-6">Trusted by teams at</p>
+      <div class="flex flex-wrap items-center justify-center gap-x-12 gap-y-5 opacity-65">
+        <span class="font-display text-xl italic">Lumen</span>
+        <span class="font-semibold tracking-[0.2em] text-sm">NORTHWIND</span>
+        <span class="font-display text-xl">Atlas &amp; Co.</span>
+        <span class="font-semibold tracking-tight text-lg">◆ Meridian</span>
+        <span class="font-display text-xl italic">Vesper</span>
+        <span class="font-semibold tracking-[0.2em] text-sm">QUARRY</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- All plans include -->
+<section class="relative z-10 px-6 lg:px-10 pb-24">
+  <div class="max-w-5xl mx-auto bg-[#ECE6D9] rounded-3xl p-10 md:p-14 border border-[#DDD5C5] reveal">
+    <div class="grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <span class="text-xs uppercase tracking-[0.2em] text-[#8A857B]">Included in every plan</span>
+        <h2 class="font-display text-3xl md:text-4xl font-light mt-3 leading-tight">
+          The fundamentals, <em class="italic text-[#B8451F]">never</em> gated behind a paywall.
+        </h2>
+      </div>
+      <div class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+        <div class="flex gap-3"><i class="fa-solid fa-shield-halved text-[#B8451F] mt-1"></i><span>99.9% uptime SLA</span></div>
+        <div class="flex gap-3"><i class="fa-solid fa-lock text-[#B8451F] mt-1"></i><span>SOC 2 Type II compliant</span></div>
+        <div class="flex gap-3"><i class="fa-solid fa-cloud text-[#B8451F] mt-1"></i><span>Daily encrypted backups</span></div>
+        <div class="flex gap-3"><i class="fa-solid fa-arrows-rotate text-[#B8451F] mt-1"></i><span>Automatic version control</span></div>
+        <div class="flex gap-3"><i class="fa-solid fa-puzzle-piece text-[#B8451F] mt-1"></i><span>Webhooks &amp; Zapier</span></div>
+        <div class="flex gap-3"><i class="fa-solid fa-mobile-screen text-[#B8451F] mt-1"></i><span>iOS &amp; Android apps</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="relative z-10 px-6 lg:px-10 pb-24">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-12 reveal">
+      <span class="text-xs uppercase tracking-[0.2em] text-[#8A857B]">FAQ</span>
+      <h2 class="font-display text-4xl md:text-5xl font-light mt-3">Questions, answered.</h2>
+    </div>
+
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="font-display text-lg md:text-xl">Can I change plans or cancel anytime?</span>
+          <i class="fa-solid fa-plus faq-icon"></i>
+        </div>
+        <div class="faq-a">
+          <p class="text-[#4A4640] pb-6 pr-8 leading-relaxed">Yes. Upgrade, downgrade, or cancel from your billing dashboard at any time. Changes prorate automatically, and we'll never charge a cancellation fee. If you cancel mid-cycle, you keep access until the period you've paid for ends.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="font-display text-lg md:text-xl">How does the 14-day free trial work?</span>
+          <i class="fa-solid fa-plus faq-icon"></i>
+        </div>
+        <div class="faq-a">
+          <p class="text-[#4A4640] pb-6 pr-8 leading-relaxed">Every plan starts with a full-featured 14-day trial — no credit card required. At the end of the trial, you pick the plan that fits. If you do nothing, your workspace simply pauses until you choose.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="font-display text-lg md:text-xl">Do you offer discounts for non-profits or education?</span>
+          <i class="fa-solid fa-plus faq-icon"></i>
+        </div>
+        <div class="faq-a">
+          <p class="text-[#4A4640] pb-6 pr-8 leading-relaxed">We offer 40% off all plans for verified non-profits, accredited educational institutions, and students. Reach out to our team with your documentation and we'll apply the discount to your account within one business day.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="font-display text-lg md:text-xl">What happens if I exceed my storage or seat limit?</span>
+          <i class="fa-solid fa-plus faq-icon"></i>
+        </div>
+        <div class="faq-a">
+          <p class="text-[#4A4640] pb-6 pr-8 leading-relaxed">We'll notify you by email before you hit your limit. You can either upgrade to the next tier or purchase additional storage and seats as add-ons. We never throttle or block your work without warning.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="font-display text-lg md:text-xl">Is my data secure, and who owns it?</span>
+          <i class="fa-solid fa-plus faq-icon"></i>
+        </div>
+        <div class="faq-a">
+          <p class="text-[#4A4640] pb-6 pr-8 leading-relaxed">You always own your content. We're SOC 2 Type II compliant, encrypt data at rest and in transit, and run daily backups across three regions. You can export everything as a standard archive at any time from your dashboard.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="font-display text-lg md:text-xl">Do you support custom contracts and invoicing?</span>
+          <i class="fa-solid fa-plus faq-icon"></i>
+        </div>
+        <div class="faq-a">
+          <p class="text-[#4A4640] pb-6 pr-8 leading-relaxed">For teams of 25 or more, we offer annual invoicing, custom MSAs, and dedicated procurement support. Contact our sales team and we'll work with your finance and legal departments to get everything in place.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="relative z-10 px-6 lg:px-10 pb-24">
+  <div class="max-w-6xl mx-auto bg-[#1A1815] text-[#F4F0E8] rounded-3xl p-12 md:p-20 relative overflow-hidden reveal">
+    <div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-[#B8451F]/25 blur-3xl"></div>
+    <div class="absolute -left-32 -bottom-32 w-96 h-96 rounded-full bg-[#C8902E]/12 blur-3xl"></div>
+    <div class="relative grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <span class="text-xs uppercase tracking-[0.2em] text-[#8A857B]">Get started</span>
+        <h2 class="font-display text-4xl md:text-5xl font-light mt-3 leading-tight">
+          Build something<br>
+          <em class="italic text-[#F2A98E]">worth keeping.</em>
+        </h2>
+        <p class="text-[#C9C2B3] mt-5 max-w-md">Start a 14-day trial on any plan. No credit card, no commitment — just the full toolkit, ready when you are.</p>
+      </div>
+      <div class="flex flex-col sm:flex-row md:flex-col gap-4 md:items-end">
+        <a href="#" class="btn-on-dark justify-center px-7">
+          Start free trial
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </a>
+        <a href="#" class="btn-outline-dark justify-center px-7">
+          <i class="fa-regular fa-calendar text-xs"></i>
+          Book a demo
+        </a>
+        <p class="text-xs text-[#8A857B] md:text-right mt-2">Or email us at hello@foundry.studio</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="relative z-10 border-t border-[#DDD5C5] px-6 lg:px-10 py-10">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div class="flex items-center gap-2.5">
+      <span class="w-7 h-7 rounded-md bg-[#1A1815] text-[#F4F0E8] flex items-center justify-center font-display font-bold text-sm">F</span>
+      <span class="font-display text-lg font-semibold">Foundry</span>
+      <span class="text-sm text-[#8A857B] ml-3">© 2025 Foundry Studio, Inc.</span>
+    </div>
+    <div class="flex items-center gap-6 text-sm text-[#4A4640]">
+      <a href="#" class="hover:text-[#1A1815]">Privacy</a>
+      <a href="#" class="hover:text-[#1A1815]">Terms</a>
+      <a href="#" class="hover:text-[#1A1815]">Security</a>
+      <a href="#" class="hover:text-[#1A1815]">Status</a>
+      <a href="#" class="hover:text-[#1A1815]"><i class="fa-brands fa-x-twitter"></i></a>
+      <a href="#" class="hover:text-[#1A1815]"><i class="fa-brands fa-github"></i></a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Billing toggle
+  const toggle = document.getElementById('billing-toggle');
+  const labelMonthly = document.getElementById('label-monthly');
+  const labelAnnual = document.getElementById('label-annual');
+  const priceEls = document.querySelectorAll('.price-num');
+  const billingNotes = document.querySelectorAll('.billing-note');
+  let annual = false;
+
+  function updatePrices() {
+    priceEls.forEach(el => {
+      el.classList.add('flipping');
+      setTimeout(() => {
+        el.textContent = annual ? el.dataset.annual : el.dataset.monthly;
+        el.classList.remove('flipping');
+      }, 180);
+    });
+    billingNotes.forEach(n => {
+      n.textContent = annual ? 'Billed annually' : 'Billed monthly';
+    });
+    if (annual) {
+      toggle.classList.add('annual');
+      toggle.setAttribute('aria-checked', 'true');
+      labelMonthly.classList.remove('tl-active'); labelMonthly.classList.add('tl-inactive');
+      labelAnnual.classList.remove('tl-inactive'); labelAnnual.classList.add('tl-active');
+    } else {
+      toggle.classList.remove('annual');
+      toggle.setAttribute('aria-checked', 'false');
+      labelAnnual.classList.remove('tl-active'); labelAnnual.classList.add('tl-inactive');
+      labelMonthly.classList.remove('tl-inactive'); labelMonthly.classList.add('tl-active');
+    }
+  }
+
+  toggle.addEventListener('click', () => { annual = !annual; updatePrices(); });
+  toggle.addEventListener('keydown', (e) => {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); annual = !annual; updatePrices(); }
+  });
+
+  // FAQ accordion — single open at a time
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.parentElement;
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Safety: reveal everything after 1.5s in case IO doesn't fire
+  setTimeout(() => { document.querySelectorAll('.reveal:not(.in)').forEach(el => el.classList.add('in')); }, 1500);
+</script>
+
+</body>
+</html>

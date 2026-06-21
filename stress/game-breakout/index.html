@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BRICKWAVE — Breakout</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0f;
+    --panel: #14161d;
+    --panel-2: #1c1f29;
+    --border: #2a2d38;
+    --border-2: #3a3d48;
+    --accent: #f5a623;
+    --accent-2: #e94560;
+    --text: #e8e9ed;
+    --muted: #8a8d99;
+  }
+  * { -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    background-image:
+      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(245,166,35,0.10), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 100% 110%, rgba(233,69,96,0.08), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 0% 100%, rgba(78,205,196,0.05), transparent 60%);
+    min-height: 100vh;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .canvas-wrap {
+    background: linear-gradient(180deg, #0e1016 0%, #07080c 100%);
+    border: 1px solid var(--border);
+    box-shadow:
+      0 40px 100px -30px rgba(0,0,0,0.9),
+      0 0 0 1px rgba(245,166,35,0.05),
+      inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .scanlines::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 3px);
+    pointer-events: none;
+    z-index: 5;
+    mix-blend-mode: overlay;
+  }
+  .btn-primary {
+    background: linear-gradient(180deg, #ffc34a 0%, #f5a623 50%, #d4881a 100%);
+    color: #1a1208;
+    box-shadow:
+      0 8px 24px -6px rgba(245,166,35,0.6),
+      0 2px 0 #8a5a08,
+      inset 0 1px 0 rgba(255,255,255,0.4);
+    transition: transform .08s ease, filter .15s ease;
+  }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 8px -2px rgba(245,166,35,0.5), inset 0 1px 0 rgba(255,255,255,0.3); }
+  .stat-card {
+    background: linear-gradient(180deg, var(--panel) 0%, #101218 100%);
+    border: 1px solid var(--border);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  .glow-text { text-shadow: 0 0 40px rgba(245,166,35,0.25); }
+  .key-cap {
+    background: linear-gradient(180deg, #2a2d38 0%, #1c1f29 100%);
+    border: 1px solid var(--border-2);
+    box-shadow: 0 2px 0 #0a0b0f, inset 0 1px 0 rgba(255,255,255,0.06);
+    color: #c8cbd4;
+  }
+  canvas { display: block; image-rendering: crisp-edges; touch-action: none; }
+  .pulse-dot { animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.85)} }
+  .overlay-card {
+    background: linear-gradient(180deg, rgba(20,22,29,0.92) 0%, rgba(10,11,15,0.92) 100%);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-2);
+    box-shadow: 0 20px 60px -10px rgba(0,0,0,0.8), 0 0 0 1px rgba(245,166,35,0.1);
+  }
+  .fade-in { animation: fadeIn .3s ease both; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .stripe {
+    background: repeating-linear-gradient(135deg, rgba(245,166,35,0.08) 0 8px, transparent 8px 16px);
+  }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <main class="flex-1 flex flex-col items-center px-4 py-6 md:py-8">
+    <div class="w-full max-w-6xl">
+
+      <!-- Header -->
+      <header class="mb-6">
+        <div class="flex items-end justify-between flex-wrap gap-5">
+          <div>
+            <div class="flex items-center gap-3 mb-2">
+              <span class="w-2 h-2 rounded-full bg-[var(--accent)] pulse-dot"></span>
+              <span class="mono text-[11px] tracking-[0.35em] text-[var(--muted)] uppercase">Arcade Cabinet · 04</span>
+            </div>
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tight glow-text leading-none">
+              BRICK<span class="text-[var(--accent)]">WAVE</span>
+            </h1>
+            <p class="text-[var(--muted)] mt-3 max-w-xl text-[15px] leading-relaxed">
+              Clear every brick in the grid. Slide the paddle with your
+              <span class="key-cap inline-block px-2 py-0.5 rounded text-xs mono mx-0.5">Mouse</span> or
+              <span class="key-cap inline-block px-2 py-0.5 rounded text-xs mono mx-0.5">←</span>
+              <span class="key-cap inline-block px-2 py-0.5 rounded text-xs mono">→</span> keys, then
+              <span class="key-cap inline-block px-2 py-0.5 rounded text-xs mono mx-0.5">Space</span> to launch.
+            </p>
+          </div>
+          <div class="flex gap-2.5">
+            <div class="stat-card rounded-lg px-4 py-3 min-w-[96px]">
+              <div class="mono text-[10px] tracking-[0.2em] text-[var(--muted)] uppercase">Score</div>
+              <div id="scoreEl" class="mono text-2xl font-bold text-[var(--accent)] leading-tight">0000</div>
+            </div>
+            <div class="stat-card rounded-lg px-4 py-3 min-w-[96px]">
+              <div class="mono text-[10px] tracking-[0.2em] text-[var(--muted)] uppercase">Lives</div>
+              <div class="flex items-center gap-1.5 mt-0.5" id="livesEl">
+                <i class="fa-solid fa-heart text-[var(--accent-2)] text-lg"></i>
+                <i class="fa-solid fa-heart text-[var(--accent-2)] text-lg"></i>
+                <i class="fa-solid fa-heart text-[var(--accent-2)] text-lg"></i>
+              </div>
+            </div>
+            <div class="stat-card rounded-lg px-4 py-3 min-w-[96px]">
+              <div class="mono text-[10px] tracking-[0.2em] text-[var(--muted)] uppercase">Level</div>
+              <div id="levelEl" class="mono text-2xl font-bold leading-tight">1</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Game + side panel -->
+      <div class="flex flex-col lg:flex-row gap-4">
+
+        <!-- Canvas -->
+        <div class="flex-1 relative canvas-wrap rounded-xl overflow-hidden scanlines">
+          <canvas id="game" width="820" height="540" class="w-full h-auto block"></canvas>
+
+          <!-- Overlay (bottom-aligned so brick grid stays visible) -->
+          <div id="overlay" class="absolute inset-0 flex items-end justify-center pb-6 px-4 pointer-events-none z-10">
+            <div id="overlayContent" class="overlay-card fade-in text-center px-6 py-4 rounded-xl pointer-events-auto max-w-[260px] w-full">
+              <div class="text-sm font-semibold mb-3">Press Start to play</div>
+              <button id="startBtn" class="btn-primary px-6 py-2.5 rounded-lg font-bold tracking-wide text-sm w-full">
+                <i class="fa-solid fa-play mr-2"></i>START
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side panel -->
+        <aside class="lg:w-60 flex flex-col gap-3">
+          <div class="stat-card rounded-xl p-4">
+            <div class="mono text-[10px] tracking-[0.25em] text-[var(--muted)] uppercase mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-gamepad text-[var(--accent)]"></i> Controls
+            </div>
+            <ul class="space-y-2.5 text-[13px]">
+              <li class="flex items-center justify-between">
+                <span class="text-[var(--muted)]">Move</span>
+                <span class="key-cap px-2 py-1 rounded text-[11px] mono">Mouse</span>
+              </li>
+              <li class="flex items-center justify-between">
+                <span class="text-[var(--muted)]">Nudge</span>
+                <span class="flex gap-1">
+                  <span class="key-cap px-2 py-1 rounded text-[11px] mono w-7 text-center">←</span>
+                  <span class="key-cap px-2 py-1 rounded text-[11px] mono w-7 text-center">→</span>
+                </span>
+              </li>
+              <li class="flex items-center justify-between">
+                <span class="text-[var(--muted)]">Launch</span>
+                <span class="key-cap px-2 py-1 rounded text-[11px] mono">Space</span>
+              </li>
+              <li class="flex items-center justify-between">
+                <span class="text-[var(--muted)]">Pause</span>
+                <span class="key-cap px-2 py-1 rounded text-[11px] mono">P</span>
+              </li>
+              <li class="flex items-center justify-between">
+                <span class="text-[var(--muted)]">Restart</span>
+                <span class="key-cap px-2 py-1 rounded text-[11px] mono">R</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="stat-card rounded-xl p-4">
+            <div class="mono text-[10px] tracking-[0.25em] text-[var(--muted)] uppercase mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-cubes-stacked text-[var(--accent)]"></i> Brick values
+            </div>
+            <div class="space-y-2 text-[13px]">
+              <div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-7 h-3 rounded-sm" style="background:#e94560;box-shadow:0 0 8px rgba(233,69,96,.4)"></span>Coral</span><span class="mono text-[var(--muted)]">50</span></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-7 h-3 rounded-sm" style="background:#f5a623;box-shadow:0 0 8px rgba(245,166,35,.4)"></span>Amber</span><span class="mono text-[var(--muted)]">40</span></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-7 h-3 rounded-sm" style="background:#f5d547;box-shadow:0 0 8px rgba(245,213,71,.4)"></span>Sun</span><span class="mono text-[var(--muted)]">30</span></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-7 h-3 rounded-sm" style="background:#4ecdc4;box-shadow:0 0 8px rgba(78,205,196,.4)"></span>Teal</span><span class="mono text-[var(--muted)]">20</span></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-7 h-3 rounded-sm" style="background:#5dade2;box-shadow:0 0 8px rgba(93,173,226,.4)"></span>Sky</span><span class="mono text-[var(--muted)]">15</span></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-7 h-3 rounded-sm" style="background:#7bc950;box-shadow:0 0 8px rgba(123,201,80,.4)"></span>Lime</span><span class="mono text-[var(--muted)]">10</span></div>
+            </div>
+          </div>
+
+          <div class="stat-card rounded-xl p-4 stripe">
+            <div class="mono text-[10px] tracking-[0.25em] text-[var(--muted)] uppercase mb-1 flex items-center gap-2">
+              <i class="fa-solid fa-trophy text-[var(--accent-2)]"></i> Best
+            </div>
+            <div id="bestEl" class="mono text-3xl font-bold text-[var(--accent-2)] leading-tight">0000</div>
+          </div>
+        </aside>
+      </div>
+
+      <footer class="mt-5 flex items-center justify-between text-[11px] text-[var(--muted)] mono flex-wrap gap-2">
+        <span class="tracking-wider">v1.0 · SINGLE-FILE BUILD</span>
+        <span class="flex items-center gap-2"><i class="fa-solid fa-circle-info text-[var(--accent)]"></i> Hit the paddle edges for sharper angles</span>
+      </footer>
+    </div>
+  </main>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const scoreEl = document.getElementById('scoreEl');
+  const livesEl = document.getElementById('livesEl');
+  const levelEl = document.getElementById('levelEl');
+  const bestEl  = document.getElementById('bestEl');
+  const overlay = document.getElementById('overlay');
+  const overlayContent = document.getElementById('overlayContent');
+
+  // Brick grid config
+  const COLS = 11, ROWS = 6;
+  const BRICK_W = 62, BRICK_H = 22, BRICK_GAP = 6;
+  const GRID_W = COLS * BRICK_W + (COLS - 1) * BRICK_GAP;
+  const GRID_X = Math.round((W - GRID_W) / 2);
+  const GRID_Y = 56;
+
+  const ROW_DEFS = [
+    { fill:'#e94560', glow:'rgba(233,69,96,0.45)',  score:50 },
+    { fill:'#f5a623', glow:'rgba(245,166,35,0.45)', score:40 },
+    { fill:'#f5d547', glow:'rgba(245,213,71,0.40)', score:30 },
+    { fill:'#4ecdc4', glow:'rgba(78,205,196,0.40)', score:20 },
+    { fill:'#5dade2', glow:'rgba(93,173,226,0.40)', score:15 },
+    { fill:'#7bc950', glow:'rgba(123,201,80,0.40)', score:10 },
+  ];
+
+  // State
+  let state = 'idle'; // idle | playing | paused | gameover | win
+  let score = 0, lives = 3, level = 1;
+  let best = parseInt(localStorage.getItem('brickwave_best') || '0', 10);
+  bestEl.textContent = String(best).padStart(4, '0');
+
+  let bricks = [];
+  let particles = [];
+  let shake = 0;
+  let flash = 0;
+
+  const paddle = { w:112, h:14, x:W/2-56, y:H-38, speed:9, targetX:W/2-56 };
+  const ball   = { x:W/2, y:H-58, r:7, vx:0, vy:0, speed:6, trail:[], stuck:true };
+  const keys = { left:false, right:false };
+
+  function buildBricks() {
+    bricks = [];
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const d = ROW_DEFS[r];
+        bricks.push({
+          x: GRID_X + c * (BRICK_W + BRICK_GAP),
+          y: GRID_Y + r * (BRICK_H + BRICK_GAP),
+          w: BRICK_W, h: BRICK_H,
+          alive: true,
+          color: d.fill, glow: d.glow, score: d.score,
+        });
+      }
+    }
+  }
+
+  function resetBall() {
+    ball.stuck = true;
+    ball.x = paddle.x + paddle.w/2;
+    ball.y = paddle.y - ball.r - 1;
+    ball.vx = 0; ball.vy = 0;
+    ball.trail = [];
+  }
+
+  function launchBall() {
+    if (!ball.stuck) return;
+    ball.stuck = false;
+    const angle = -Math.PI/2 + (Math.random() * 0.5 - 0.25);
+    ball.vx = Math.cos(angle) * ball.speed;
+    ball.vy = Math.sin(angle) * ball.speed;
+  }
+
+  function updateHUD() {
+    scoreEl.textContent = String(score).padStart(4, '0');
+    levelEl.textContent = level;
+    // Lives as hearts
+    let html = '';
+    for (let i = 0; i < 3; i++) {
+      html += `<i class="fa-solid fa-heart text-lg ${i < lives ? 'text-[var(--accent-2)]' : 'text-[#2a2d38]'}"></i>`;
+    }
+    livesEl.innerHTML = html;
+  }
+
+  function showOverlay(html) {
+    overlayContent.innerHTML = html;
+    overlayContent.classList.remove('fade-in');
+    void overlayContent.offsetWidth;
+    overlayContent.classList.add('fade-in');
+    overlay.style.display = 'flex';
+    const btn = document.getElementById('startBtn');
+    if (btn) btn.addEventListener('click', handleStart);
+  }
+  function hideOverlay() { overlay.style.display = 'none'; }
+
+  function handleStart() {
+    if (state === 'win') nextLevel();
+    else if (state === 'paused') { state = 'playing'; hideOverlay(); }
+    else startGame();
+  }
+
+  function startGame() {
+    score = 0; lives = 3; level = 1; ball.speed = 6;
+    buildBricks(); resetBall(); updateHUD();
+    state = 'playing'; hideOverlay();
+  }
+
+  function nextLevel() {
+    level++;
+    ball.speed = Math.min(10.5, 6 + (level - 1) * 0.7);
+    buildBricks(); resetBall(); updateHUD();
+    state = 'playing'; hideOverlay();
+  }
+
+  function loseLife() {
+    lives--; shake = 14; flash = 1;
+    updateHUD();
+    if (lives <= 0) gameOver();
+    else resetBall();
+  }
+
+  function gameOver() {
+    state = 'gameover';
+    if (score > best) {
+      best = score;
+      localStorage.setItem('brickwave_best', String(best));
+      bestEl.textContent = String(best).padStart(4, '0');
+    }
+    showOverlay(`
+      <div class="mono text-[11px] tracking-[0.35em] text-[var(--accent-2)] uppercase mb-2">Game Over</div>
+      <div class="text-2xl font-bold mb-1">Final Score</div>
+      <div class="mono text-4xl font-bold text-[var(--accent)] mb-1">${String(score).padStart(4,'0')}</div>
+      <div class="text-[var(--muted)] text-sm mb-4">Best · ${String(best).padStart(4,'0')}</div>
+      <button id="startBtn" class="btn-primary px-7 py-2.5 rounded-lg font-bold tracking-wide text-sm">
+        <i class="fa-solid fa-rotate-right mr-2"></i>PLAY AGAIN
+      </button>
+    `);
+  }
+
+  function winGame() {
+    state = 'win';
+    showOverlay(`
+      <div class="mono text-[11px] tracking-[0.35em] text-[var(--accent)] uppercase mb-2">Level ${level} Cleared</div>
+      <div class="text-2xl font-bold mb-1">Score · <span class="text-[var(--accent)] mono">${String(score).padStart(4,'0')}</span></div>
+      <div class="text-[var(--muted)] text-sm mb-4">Next level: ball moves faster.</div>
+      <button id="startBtn" class="btn-primary px-7 py-2.5 rounded-lg font-bold tracking-wide text-sm">
+        <i class="fa-solid fa-forward mr-2"></i>NEXT LEVEL
+      </button>
+    `);
+  }
+
+  function showPause() {
+    showOverlay(`
+      <div class="mono text-[11px] tracking-[0.35em] text-[var(--accent)] uppercase mb-2">Paused</div>
+      <div class="text-2xl font-bold mb-3">Take a breath</div>
+      <button id="startBtn" class="btn-primary px-7 py-2.5 rounded-lg font-bold tracking-wide text-sm">
+        <i class="fa-solid fa-play mr-2"></i>RESUME
+      </button>
+    `);
+  }
+
+  function showReady() {
+    showOverlay(`
+      <div class="text-sm font-semibold mb-3">Press Start to play</div>
+      <button id="startBtn" class="btn-primary px-6 py-2.5 rounded-lg font-bold tracking-wide text-sm w-full">
+        <i class="fa-solid fa-play mr-2"></i>START
+      </button>
+    `);
+  }
+
+  // Input
+  function getCanvasX(clientX) {
+    const rect = canvas.getBoundingClientRect();
+    return (clientX - rect.left) * (canvas.width / rect.width);
+  }
+  canvas.addEventListener('mousemove', (e) => {
+    paddle.targetX = getCanvasX(e.clientX) - paddle.w/2;
+  });
+  canvas.addEventListener('click', () => {
+    if (state === 'playing' && ball.stuck) launchBall();
+  });
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (e.touches[0]) paddle.targetX = getCanvasX(e.touches[0].clientX) - paddle.w/2;
+  }, { passive:false });
+  canvas.addEventListener('touchstart', (e) => {
+    if (state === 'playing' && ball.stuck) launchBall();
+    else if (state === 'idle' || state === 'gameover') startGame();
+    else if (state === 'win') nextLevel();
+  }, { passive:true });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft')  { keys.left  = true; e.preventDefault(); }
+    if (e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (state === 'idle' || state === 'gameover') startGame();
+      else if (state === 'win') nextLevel();
+      else if (state === 'paused') { state = 'playing'; hideOverlay(); }
+      else if (state === 'playing') {
+        if (ball.stuck) launchBall();
+        else { state = 'paused'; showPause(); }
+      }
+    }
+    if (e.key === 'p' || e.key === 'P') {
+      if (state === 'playing') { state = 'paused'; showPause(); }
+      else if (state === 'paused') { state = 'playing'; hideOverlay(); }
+    }
+    if (e.key === 'r' || e.key === 'R') {
+      state = 'idle'; score = 0; lives = 3; level = 1; ball.speed = 6;
+      buildBricks(); resetBall(); updateHUD(); showReady();
+    }
+  });
+  document.addEventListener('keyup', (e) => {
+    if (e.key === 'ArrowLeft')  keys.left  = false;
+    if (e.key === 'ArrowRight') keys.right = false;
+  });
+
+  // Particles
+  function spawnParticles(x, y, color) {
+    for (let i = 0; i < 12; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const s = 1 + Math.random() * 3.5;
+      particles.push({
+        x, y,
+        vx: Math.cos(a) * s,
+        vy: Math.sin(a) * s - 1.2,
+        life: 1,
+        color,
+        size: 2 + Math.random() * 2.5
+      });
+    }
+  }
+
+  function update() {
+    // Paddle: keyboard nudges target, mouse sets target, smooth follow
+    if (keys.left)  paddle.targetX -= paddle.speed;
+    if (keys.right) paddle.targetX += paddle.speed;
+    paddle.targetX = Math.max(0, Math.min(W - paddle.w, paddle.targetX));
+    paddle.x += (paddle.targetX - paddle.x) * 0.4;
+    paddle.x = Math.max(0, Math.min(W - paddle.w, paddle.x));
+
+    if (ball.stuck) {
+      ball.x = paddle.x + paddle.w/2;
+      ball.y = paddle.y - ball.r - 1;
+    } else if (state === 'playing') {
+      ball.trail.push({ x: ball.x, y: ball.y });
+      if (ball.trail.length > 14) ball.trail.shift();
+
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // Walls
+      if (ball.x - ball.r < 0)   { ball.x = ball.r;     ball.vx = Math.abs(ball.vx); }
+      if (ball.x + ball.r > W)   { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); }
+      if (ball.y - ball.r < 0)   { ball.y = ball.r;     ball.vy = Math.abs(ball.vy); }
+      if (ball.y - ball.r > H)   { loseLife(); return; }
+
+      // Paddle
+      if (ball.vy > 0 &&
+          ball.x > paddle.x - ball.r && ball.x < paddle.x + paddle.w + ball.r &&
+          ball.y + ball.r > paddle.y && ball.y - ball.r < paddle.y + paddle.h) {
+        ball.y = paddle.y - ball.r;
+        const hit = (ball.x - (paddle.x + paddle.w/2)) / (paddle.w/2);
+        const clamped = Math.max(-1, Math.min(1, hit));
+        const angle = clamped * (Math.PI / 3);
+        const speed = Math.max(ball.speed, Math.hypot(ball.vx, ball.vy));
+        ball.vx = Math.sin(angle) * speed;
+        ball.vy = -Math.cos(angle) * speed;
+      }
+
+      // Bricks (one break per frame)
+      for (const b of bricks) {
+        if (!b.alive) continue;
+        if (ball.x + ball.r > b.x && ball.x - ball.r < b.x + b.w &&
+            ball.y + ball.r > b.y && ball.y - ball.r < b.y + b.h) {
+          b.alive = false;
+          score += b.score;
+          updateHUD();
+          spawnParticles(b.x + b.w/2, b.y + b.h/2, b.color);
+
+          const bcx = b.x + b.w/2, bcy = b.y + b.h/2;
+          const dx = ball.x - bcx, dy = ball.y - bcy;
+          const overlapX = (b.w/2 + ball.r) - Math.abs(dx);
+          const overlapY = (b.h/2 + ball.r) - Math.abs(dy);
+          if (overlapX < overlapY) {
+            ball.vx = dx > 0 ? Math.abs(ball.vx) : -Math.abs(ball.vx);
+            ball.x += dx > 0 ? overlapX : -overlapX;
+          } else {
+            ball.vy = dy > 0 ? Math.abs(ball.vy) : -Math.abs(ball.vy);
+            ball.y += dy > 0 ? overlapY : -overlapY;
+          }
+
+          if (bricks.every(br => !br.alive)) winGame();
+          break;
+        }
+      }
+    }
+
+    // Particles
+    for (const p of particles) {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.16; p.life -= 0.025;
+    }
+    particles = particles.filter(p => p.life > 0);
+
+    if (shake > 0) shake -= 0.9;
+    if (flash > 0) flash -= 0.05;
+  }
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawBackground() {
+    ctx.fillStyle = '#08090d';
+    ctx.fillRect(0, 0, W, H);
+    // Faint grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.022)';
+    ctx.lineWidth = 1;
+    for (let x = 40; x < W; x += 40) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 40; y < H; y += 40) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+    // Top accent strip
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0,   'rgba(245,166,35,0)');
+    grad.addColorStop(0.5, 'rgba(245,166,35,0.5)');
+    grad.addColorStop(1,   'rgba(245,166,35,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, 2);
+    // Bottom danger line
+    ctx.strokeStyle = 'rgba(233,69,96,0.18)';
+    ctx.setLineDash([6, 6]);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, H - 14); ctx.lineTo(W, H - 14);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Border
+    ctx.strokeStyle = 'rgba(245,166,35,0.12)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, 0.5, W - 1, H - 1);
+  }
+
+  function drawBricks() {
+    for (const b of bricks) {
+      if (!b.alive) continue;
+      ctx.shadowColor = b.glow;
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = b.color;
+      roundRect(b.x, b.y, b.w, b.h, 4);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      // Top highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.22)';
+      roundRect(b.x + 3, b.y + 2, b.w - 6, 3, 1.5);
+      ctx.fill();
+      // Bottom shade
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+      ctx.fillRect(b.x + 3, b.y + b.h - 3, b.w - 6, 2);
+    }
+  }
+
+  function drawPaddle() {
+    ctx.shadowColor = 'rgba(245,166,35,0.65)';
+    ctx.shadowBlur = 22;
+    const g = ctx.createLinearGradient(paddle.x, paddle.y, paddle.x, paddle.y + paddle.h);
+    g.addColorStop(0,   '#ffd166');
+    g.addColorStop(0.5, '#f5a623');
+    g.addColorStop(1,   '#b8730a');
+    ctx.fillStyle = g;
+    roundRect(paddle.x, paddle.y, paddle.w, paddle.h, 7);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    // Highlight stripe
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    roundRect(paddle.x + 8, paddle.y + 2, paddle.w - 16, 2, 1);
+    ctx.fill();
+    // Side caps
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillRect(paddle.x + 4, paddle.y + paddle.h - 3, paddle.w - 8, 2);
+  }
+
+  function drawBall() {
+    // Trail
+    for (let i = 0; i < ball.trail.length; i++) {
+      const t = ball.trail[i];
+      const k = i / ball.trail.length;
+      ctx.fillStyle = `rgba(255,200,100,${k * 0.35})`;
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, Math.max(0.5, ball.r * k * 0.9), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Ball
+    ctx.shadowColor = 'rgba(255,210,120,0.9)';
+    ctx.shadowBlur = 18;
+    const g = ctx.createRadialGradient(ball.x - 2, ball.y - 2, 1, ball.x, ball.y, ball.r);
+    g.addColorStop(0, '#fff7dd');
+    g.addColorStop(0.6, '#ffd166');
+    g.addColorStop(1, '#e08a0a');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  function drawParticles() {
+    for (const p of particles) {
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawHint() {
+    if (ball.stuck && state === 'playing') {
+      ctx.fillStyle = 'rgba(255,255,255,0.45)';
+      ctx.font = '600 11px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('CLICK OR PRESS SPACE TO LAUNCH', W/2, paddle.y - 26);
+      // Arrow
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(W/2, paddle.y - 18);
+      ctx.lineTo(W/2, paddle.y - 10);
+      ctx.moveTo(W/2 - 4, paddle.y - 14);
+      ctx.lineTo(W/2, paddle.y - 10);
+      ctx.lineTo(W/2 + 4, paddle.y - 14);
+      ctx.stroke();
+    }
+  }
+
+  function drawFlash() {
+    if (flash > 0) {
+      ctx.fillStyle = `rgba(233,69,96,${flash * 0.25})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+
+  function render() {
+    ctx.save();
+    if (shake > 0) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+    drawBackground();
+    drawBricks();
+    drawPaddle();
+    drawBall();
+    drawParticles();
+    drawHint();
+    drawFlash();
+    ctx.restore();
+  }
+
+  function loop() {
+    update();
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  // Init — render brick grid immediately on page load, before Start is pressed.
+  // Build the full 6-row × 11-column colored brick grid so it is visible right away.
+  buildBricks();
+  resetBall();
+  updateHUD();
+  // Start the render loop so the grid, paddle, and ball are drawn on load.
+  loop();
+  // Bind the initial Start button (the one already present in the overlay markup).
+  document.getElementById('startBtn').addEventListener('click', handleStart);
+})();
+</script>
+</body>
+</html>

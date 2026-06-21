@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elias Marén — Photographer, Bergen</title>
+<meta name="description" content="Elias Marén is a photographer working along the North Atlantic coast. Medium-format film, bad weather, slow pictures.">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --paper: #F4F1EA;
+    --paper-dark: #ECE7DC;
+    --ink: #1C1A17;
+    --ink-soft: #6B6660;
+    --rule: #D4CFC4;
+    --accent: #8B3A2F;
+  }
+  * { -webkit-font-smoothing: antialiased; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+  }
+  .font-display { font-family: 'Fraunces', serif; font-variation-settings: "opsz" 144; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  .hero-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center 45%;
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg,
+      rgba(28,26,23,0.45) 0%,
+      rgba(28,26,23,0) 22%,
+      rgba(28,26,23,0) 55%,
+      rgba(28,26,23,0.65) 100%);
+  }
+
+  .masonry { column-count: 3; column-gap: 28px; }
+  @media (max-width: 1024px) { .masonry { column-count: 2; column-gap: 20px; } }
+  @media (max-width: 640px) { .masonry { column-count: 1; } }
+  .masonry-item { break-inside: avoid; margin-bottom: 36px; }
+  @media (max-width: 640px) { .masonry-item { margin-bottom: 28px; } }
+
+  .photo-wrap { position: relative; overflow: hidden; background: var(--paper-dark); }
+  .photo-wrap img {
+    display: block; width: 100%;
+    transition: transform 0.8s cubic-bezier(0.2, 0, 0.2, 1);
+  }
+  .photo-wrap:hover img { transform: scale(1.03); }
+
+  ::selection { background: var(--accent); color: var(--paper); }
+
+  .grain::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity: 0.06;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  .nav-blend { mix-blend-mode: difference; color: white; }
+  .nav-blend a { transition: opacity 0.2s; }
+  .nav-blend a:hover { opacity: 0.55; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+    html { scroll-behavior: auto; }
+    .photo-wrap:hover img { transform: none; }
+  }
+  @media (pointer: coarse) {
+    .photo-wrap:hover img { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<header class="fixed top-0 left-0 right-0 z-50 px-6 md:px-10 py-5 flex items-center justify-between nav-blend">
+  <a href="#top" class="font-display text-lg md:text-xl tracking-tight">Elias Marén</a>
+  <nav class="flex gap-6 md:gap-8 text-[11px] md:text-xs font-mono uppercase tracking-wider">
+    <a href="#about">About</a>
+    <a href="#work">Work</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<!-- Hero -->
+<section id="top" class="relative h-screen min-h-[600px] w-full overflow-hidden grain">
+  <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=2400&q=85&auto=format" alt="Coastal mountain road winding through fog, Lofoten Islands" class="hero-img" fetchpriority="high">
+  <div class="hero-overlay"></div>
+
+  <div class="relative h-full flex flex-col justify-between px-6 md:px-10 pt-24 pb-10 md:pb-14 text-white">
+    <div></div>
+    <div class="flex items-end justify-between gap-8">
+      <div class="max-w-3xl">
+        <p class="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.22em] opacity-70 mb-5">Series 01 — North Atlantic Edge</p>
+        <h1 class="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] leading-[0.95] font-light">
+          The slow weather<br>of coastal places.
+        </h1>
+      </div>
+      <div class="hidden md:block text-right font-mono text-[11px] opacity-70 leading-relaxed shrink-0">
+        <p>68°N · 13°E</p>
+        <p>Lofoten, NO</p>
+        <p class="mt-3">2021—2024</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="absolute bottom-5 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.3em] text-white/50">
+    ↓
+  </div>
+</section>
+
+<!-- About -->
+<section id="about" class="px-6 md:px-10 py-24 md:py-36">
+  <div class="grid grid-cols-12 gap-6 md:gap-10">
+    <div class="col-span-12 md:col-span-2">
+      <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--ink-soft)]">§ 01 — About</p>
+    </div>
+
+    <div class="col-span-12 md:col-span-4 md:col-start-3">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80&auto=format" alt="Self-portrait of Elias Marén in his Bergen studio" class="w-full aspect-[4/5] object-cover grayscale" loading="lazy">
+      </div>
+      <div class="mt-3 flex justify-between font-mono text-[10px] text-[var(--ink-soft)] uppercase tracking-wider">
+        <span>Self-portrait</span>
+        <span>Bergen · 2023</span>
+      </div>
+    </div>
+
+    <div class="col-span-12 md:col-span-5 md:col-start-8">
+      <h2 class="font-display text-3xl md:text-[2.5rem] leading-[1.15] font-light mb-10">
+        Photographs made slowly, on film, mostly in bad weather.
+      </h2>
+      <div class="space-y-5 text-[15px] leading-[1.7] max-w-md">
+        <p>Elias Marén (b. 1986, Oslo) is a photographer working along the North Atlantic coast. His ongoing project <em>Still Water</em> documents the slow erosion of fishing communities from Lofoten to the Outer Hebrides — six years of medium-format film, bad ferries, and rented rooms above fish-processing plants.</p>
+        <p>Solo exhibitions include Foam Amsterdam (2022), Nordiska Museet Stockholm (2023), and Gallery Axel Oslo (2024). His first monograph was published by Mack Books in spring 2024; a second is in preparation.</p>
+        <p>Represented by Gallery Axel. Available for editorial and commission work across Scandinavia and the UK.</p>
+      </div>
+
+      <div class="mt-12 pt-6 border-t border-[var(--rule)]">
+        <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--ink-soft)] mb-3">Selected clients</p>
+        <p class="text-sm text-[var(--ink-soft)] leading-relaxed">The New Yorker · NYT Magazine · Aperture · M le Monde · Kinfolk · Hermès · Aesop</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section id="work" class="px-6 md:px-10 py-24 md:py-36 border-t border-[var(--rule)]">
+  <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 md:mb-24 gap-6">
+    <div>
+      <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--ink-soft)] mb-5">§ 02 — Selected Work</p>
+      <h2 class="font-display text-4xl md:text-6xl lg:text-7xl font-light leading-[0.95]">Twelve frames,<br>2021—2024.</h2>
+    </div>
+    <p class="font-mono text-[11px] text-[var(--ink-soft)] max-w-[220px] md:text-right leading-relaxed">
+      All images medium-format film.<br>Prints available on request.
+    </p>
+  </div>
+
+  <div class="masonry">
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=900&q=80&auto=format" alt="Mountain summit with sun breaking through clouds, Jotunheimen" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">01</span><p class="text-[13px] mt-0.5">Summit Light, Jotunheimen</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">NO · 2024</span>
+      </figcaption>
+    </figure>
+
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=900&q=80&auto=format" alt="Portrait of Anna on the Outer Hebrides" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">02</span><p class="text-[13px] mt-0.5">Anna, Outer Hebrides</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">UK · 2022</span>
+      </figcaption>
+    </figure>
+
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=900&q=80&auto=format" alt="North Sea in January, aerial view of waves" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">03</span><p class="text-[13px] mt-0.5">North Sea, January</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">NO · 2024</span>
+      </figcaption>
+    </figure>
+
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=900&q=80&auto=format" alt="Forest interior with light filtering through trees, Hardanger" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">04</span><p class="text-[13px] mt-0.5">Forest Interior, Hardanger</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">NO · 2021</span>
+      </figcaption>
+    </figure>
+
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=900&q=80&auto=format" alt="Still lake with mountains reflected, Isle of Lewis" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">05</span><p class="text-[13px] mt-0.5">Still Water II, Lewis</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">UK · 2023</span>
+      </figcaption>
+    </figure>
+
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=900&q=80&auto=format" alt="Rainy street in Paris, Rue de Bretagne" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">06</span><p class="text-[13px] mt-0.5">Rue de Bretagne, Paris</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">FR · 2022</span>
+      </figcaption>
+    </figure>
+
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=900&q=80&auto=format" alt="Waterfall in Geirangerfjord" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">07</span><p class="text-[13px] mt-0.5">Falls, Geirangerfjord</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">NO · 2021</span>
+      </figcaption>
+    </figure>
+
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=900&q=80&auto=format" alt="Mountain lake with reflection, Oppland" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">08</span><p class="text-[13px] mt-0.5">Lake, Oppland</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">NO · 2022</span>
+      </figcaption>
+    </figure>
+
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=900&q=80&auto=format" alt="Portrait of Inga in the studio" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">09</span><p class="text-[13px] mt-0.5">Inga, Studio</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">NO · 2023</span>
+      </figcaption>
+    </figure>
+
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=900&q=80&auto=format" alt="Lake reflection with mountains, Lofoten" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">10</span><p class="text-[13px] mt-0.5">Reflection, Lofoten</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">NO · 2022</span>
+      </figcaption>
+    </figure>
+
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1500964757637-c85e8a162699?w=900&q=80&auto=format" alt="Mountain peaks at dawn, Senja" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">11</span><p class="text-[13px] mt-0.5">Peaks, Dawn, Senja</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">NO · 2024</span>
+      </figcaption>
+    </figure>
+
+    <figure class="masonry-item">
+      <div class="photo-wrap">
+        <img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?w=900&q=80&auto=format" alt="Café interior in Bergen" loading="lazy">
+      </div>
+      <figcaption class="mt-3 flex justify-between items-baseline gap-4">
+        <div><span class="font-mono text-[10px] text-[var(--ink-soft)]">12</span><p class="text-[13px] mt-0.5">Café, Bergen</p></div>
+        <span class="font-mono text-[10px] text-[var(--ink-soft)] shrink-0">NO · 2023</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Contact -->
+<footer id="contact" class="px-6 md:px-10 pt-24 md:pt-36 pb-10 border-t border-[var(--rule)]">
+  <div class="grid grid-cols-12 gap-6 md:gap-10">
+    <div class="col-span-12 md:col-span-2">
+      <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--ink-soft)]">§ 03 — Contact</p>
+    </div>
+
+    <div class="col-span-12 md:col-span-9 md:col-start-3">
+      <p class="font-display text-3xl md:text-5xl lg:text-6xl font-light leading-[1.1] mb-12 max-w-4xl">
+        For prints, commissions, or exhibition enquiries — write directly.
+      </p>
+
+      <a href="mailto:studio@eliasmaren.no" class="font-display text-2xl md:text-4xl font-light inline-block border-b border-[var(--rule)] hover:border-[var(--ink)] transition-colors pb-2">
+        studio@eliasmaren.no
+      </a>
+
+      <div class="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6">
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--ink-soft)] mb-3">Studio</p>
+          <p class="text-sm leading-relaxed">Bergen, Norway<br><span class="text-[var(--ink-soft)]">By appointment</span></p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--ink-soft)] mb-3">Representation</p>
+          <p class="text-sm leading-relaxed">Gallery Axel, Oslo<br><span class="text-[var(--ink-soft)]">+47 22 00 00 00</span></p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--ink-soft)] mb-3">Elsewhere</p>
+          <p class="text-sm leading-relaxed">
+            <a href="#" class="border-b border-[var(--rule)] hover:border-[var(--ink)] transition-colors">Instagram</a><br>
+            <a href="#" class="border-b border-[var(--rule)] hover:border-[var(--ink)] transition-colors">Are.na</a>
+          </p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--ink-soft)] mb-3">Monograph</p>
+          <p class="text-sm leading-relaxed"><em>Still Water</em><br><span class="text-[var(--ink-soft)]">Mack Books, 2024</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-24 md:mt-32 pt-6 border-t border-[var(--rule)] flex flex-col md:flex-row justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--ink-soft)]">
+    <p>© 2024 Elias Marén — All images medium-format film</p>
+    <p>Set in Fraunces & Inter — Bergen, 60°N</p>
+  </div>
+</footer>
+
+</body>
+</html>

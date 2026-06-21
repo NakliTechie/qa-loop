@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halo 03 — Task Lamp by Studio Vesper</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#F2EEE5',
+          'bg-alt': '#EAE3D2',
+          ink: '#1A1815',
+          'ink-soft': '#524C44',
+          'ink-faint': '#8A8278',
+          accent: '#B8732A',
+          'accent-soft': '#D4A04C',
+          line: '#D8CFB9',
+          'dark-bg': '#1A1815',
+          'dark-soft': '#2A2724'
+        },
+        fontFamily: {
+          display: ['Fraunces', 'Georgia', 'serif'],
+          sans: ['Inter', 'system-ui', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<style>
+  :root {
+    --bg: #F2EEE5;
+    --bg-alt: #EAE3D2;
+    --ink: #1A1815;
+    --ink-soft: #524C44;
+    --ink-faint: #8A8278;
+    --accent: #B8732A;
+    --accent-soft: #D4A04C;
+    --line: #D8CFB9;
+    --dark-bg: #1A1815;
+    --dark-soft: #2A2724;
+  }
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-feature-settings: "ss01", "cv11";
+  }
+  .font-display {
+    font-family: 'Fraunces', Georgia, serif;
+    font-optical-sizing: auto;
+    letter-spacing: -0.022em;
+  }
+  /* Subtle paper grain over everything */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+  }
+
+  .canvas-stage {
+    background:
+      radial-gradient(120% 90% at 50% 18%, #FBF7EC 0%, #F1E9D4 45%, #E4D9BD 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.6),
+      inset 0 -40px 80px -40px rgba(120, 90, 40, 0.28),
+      0 30px 60px -30px rgba(40, 30, 15, 0.25);
+  }
+  .canvas-stage canvas { display: block; width: 100% !important; height: 100% !important; border-radius: inherit; }
+
+  .hairline { border-color: var(--line); }
+  .ring-line { box-shadow: inset 0 0 0 1px var(--line); }
+
+  .btn-ink {
+    background: var(--ink);
+    color: #F7F3E8;
+    transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+  }
+  .btn-ink:hover { background: #2a2622; transform: translateY(-1px); box-shadow: 0 10px 24px -12px rgba(20,15,8,.55); }
+
+  .btn-ghost {
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    transition: background .25s ease, color .25s ease;
+  }
+  .btn-ghost:hover { background: var(--ink); color: #F7F3E8; }
+
+  .marquee-track {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: marq 38s linear infinite;
+  }
+  @keyframes marq { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  .spec-num { font-family: 'Fraunces', serif; font-feature-settings: "tnum","lnum"; }
+
+  .swatch { width: 14px; height: 14px; border-radius: 9999px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+
+  .dot-grid {
+    background-image: radial-gradient(rgba(26,24,21,0.16) 1px, transparent 1px);
+    background-size: 14px 14px;
+  }
+
+  .loader {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--ink-faint); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    transition: opacity .6s ease;
+  }
+  .loader.hidden { opacity: 0; pointer-events: none; }
+  .loader .bar { width: 90px; height: 2px; background: rgba(26,24,21,.12); margin-top: 10px; overflow: hidden; position: relative; }
+  .loader .bar::after { content: ''; position: absolute; inset: 0; width: 40%; background: var(--accent); animation: load 1.1s ease-in-out infinite; }
+  @keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track { animation: none; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body class="relative">
+
+<!-- Announcement -->
+<div class="relative z-20 bg-ink text-[#F2EEE5] text-[11px] tracking-[0.18em] uppercase">
+  <div class="max-w-[1280px] mx-auto px-6 py-2.5 flex items-center justify-between">
+    <span class="hidden sm:inline opacity-70">Edition 03 · Ships worldwide from Lisbon</span>
+    <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-accent-soft"></span> Atelier open · 4 lamps left this batch</span>
+    <span class="hidden sm:inline opacity-70">10-year warranty</span>
+  </div>
+</div>
+
+<!-- Nav -->
+<header class="relative z-20 border-b hairline bg-bg/80 backdrop-blur">
+  <nav class="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2.5">
+      <span class="w-7 h-7 rounded-full bg-ink grid place-items-center">
+        <span class="w-2.5 h-2.5 rounded-full bg-accent-soft"></span>
+      </span>
+      <span class="font-display text-[19px] font-medium tracking-tight">Studio Vesper</span>
+    </a>
+    <ul class="hidden md:flex items-center gap-8 text-[13px] text-ink-soft">
+      <li><a href="#lamp" class="hover:text-ink transition">The Lamp</a></li>
+      <li><a href="#specs" class="hover:text-ink transition">Specifications</a></li>
+      <li><a href="#detail" class="hover:text-ink transition">In Detail</a></li>
+      <li><a href="#story" class="hover:text-ink transition">Atelier</a></li>
+    </ul>
+    <div class="flex items-center gap-4">
+      <button class="text-ink-soft hover:text-ink transition text-[13px] hidden sm:inline">Sign in</button>
+      <button class="btn-ink rounded-full px-4 py-2 text-[12.5px] tracking-wide flex items-center gap-2">
+        <i class="fa-solid fa-bag-shopping text-[11px]"></i> Bag · 0
+      </button>
+    </div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section id="lamp" class="relative z-10">
+  <div class="max-w-[1280px] mx-auto px-6 pt-10 lg:pt-16 pb-8">
+    <div class="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+
+      <!-- Copy -->
+      <div class="lg:col-span-5 reveal">
+        <div class="flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase text-ink-faint mb-6">
+          <span>03</span>
+          <span class="w-8 h-px bg-line"></span>
+          <span>Task Lamp</span>
+          <span class="w-8 h-px bg-line"></span>
+          <span class="text-accent">In stock</span>
+        </div>
+
+        <h1 class="font-display text-[58px] sm:text-[72px] lg:text-[84px] leading-[0.92] font-light text-ink">
+          Halo<span class="italic font-normal"> 03</span>
+        </h1>
+        <p class="font-display italic text-[22px] text-ink-soft mt-3">A quiet machine for seeing.</p>
+
+        <p class="mt-7 text-[15.5px] leading-[1.7] text-ink-soft max-w-[440px]">
+          A counter-weighted task lamp in spun brass and cast zinc. One articulated arm,
+          one capacitive dial, one warm pool of light exactly where you set it. Designed to
+          be repaired, not replaced.
+        </p>
+
+        <!-- Inline specs -->
+        <div class="mt-8 grid grid-cols-3 gap-4 max-w-[440px]">
+          <div class="border-t hairline pt-3">
+            <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Output</div>
+            <div class="spec-num text-[22px] mt-1">540<span class="text-[13px] text-ink-faint ml-1">lm</span></div>
+          </div>
+          <div class="border-t hairline pt-3">
+            <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Color</div>
+            <div class="spec-num text-[22px] mt-1">2700<span class="text-[13px] text-ink-faint ml-1">K</span></div>
+          </div>
+          <div class="border-t hairline pt-3">
+            <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">CRI</div>
+            <div class="spec-num text-[22px] mt-1">95</div>
+          </div>
+        </div>
+
+        <!-- Price + CTAs -->
+        <div class="mt-9 flex flex-wrap items-center gap-4">
+          <div>
+            <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">From</div>
+            <div class="font-display text-[30px] leading-none mt-1">€385</div>
+          </div>
+          <button class="btn-ink rounded-full px-7 py-3.5 text-[13.5px] tracking-wide flex items-center gap-2.5">
+            Add to bag <i class="fa-solid fa-arrow-right text-[11px]"></i>
+          </button>
+          <button class="btn-ghost rounded-full px-6 py-3.5 text-[13.5px] tracking-wide">Configure finish</button>
+        </div>
+
+        <div class="mt-6 flex items-center gap-3 text-[12px] text-ink-faint">
+          <div class="flex items-center gap-1.5">
+            <span class="swatch" style="background:#B8732A"></span>
+            <span class="swatch" style="background:#1A1815"></span>
+            <span class="swatch" style="background:#D8CFB9"></span>
+            <span class="swatch" style="background:#6B3A1F"></span>
+          </div>
+          <span>4 finishes · lead time 2 weeks</span>
+        </div>
+      </div>
+
+      <!-- 3D Canvas -->
+      <div class="lg:col-span-7 reveal">
+        <div class="relative">
+          <!-- frame labels -->
+          <div class="flex items-end justify-between mb-3 px-1">
+            <div class="text-[11px] uppercase tracking-[0.2em] text-ink-faint">Live model · 1:1</div>
+            <div class="text-[11px] uppercase tracking-[0.2em] text-ink-faint flex items-center gap-2">
+              <i class="fa-solid fa-arrows-rotate text-[10px] text-accent"></i> Drag to orbit
+            </div>
+          </div>
+
+          <div class="canvas-stage relative rounded-[6px] ring-line overflow-hidden h-[460px] sm:h-[560px] lg:h-[660px]">
+            <div id="lamp-canvas" class="absolute inset-0"></div>
+            <div id="lamp-loader" class="loader">
+              <div class="text-center">
+                <div>Building model</div>
+                <div class="bar mx-auto"></div>
+              </div>
+            </div>
+
+            <!-- corner ticks -->
+            <div class="pointer-events-none absolute top-3 left-3 text-[10px] tracking-[0.2em] uppercase text-ink-faint/80">Halo 03</div>
+            <div class="pointer-events-none absolute top-3 right-3 text-[10px] tracking-[0.2em] uppercase text-ink-faint/80">SV—03/24</div>
+            <div class="pointer-events-none absolute bottom-3 left-3 text-[10px] tracking-[0.2em] uppercase text-ink-faint/80">Brass / Zinc</div>
+            <div class="pointer-events-none absolute bottom-3 right-3 text-[10px] tracking-[0.2em] uppercase text-ink-faint/80">52 cm</div>
+          </div>
+
+          <div class="mt-3 flex items-center justify-between text-[12px] text-ink-faint px-1">
+            <span>Auto-rotating · scroll to zoom</span>
+            <button id="reset-view" class="hover:text-ink transition flex items-center gap-1.5"><i class="fa-solid fa-rotate-left text-[10px]"></i> Reset view</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Marquee -->
+<section class="relative z-10 border-y hairline bg-bg-alt/60 overflow-hidden">
+  <div class="py-4 overflow-hidden">
+    <div class="marquee-track text-[13px] tracking-[0.18em] uppercase text-ink-soft">
+      <span class="px-8 flex items-center gap-8">Spun brass shade <span class="text-accent">◆</span> Cast zinc base <span class="text-accent">◆</span> Capacitive dimming <span class="text-accent">◆</span> Tunable 2700–4000K <span class="text-accent">◆</span> 10-year repair pledge <span class="text-accent">◆</span> Made in Lisbon <span class="text-accent">◆</span></span>
+      <span class="px-8 flex items-center gap-8">Spun brass shade <span class="text-accent">◆</span> Cast zinc base <span class="text-accent">◆</span> Capacitive dimming <span class="text-accent">◆</span> Tunable 2700–4000K <span class="text-accent">◆</span> 10-year repair pledge <span class="text-accent">◆</span> Made in Lisbon <span class="text-accent">◆</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- SPECS -->
+<section id="specs" class="relative z-10">
+  <div class="max-w-[1280px] mx-auto px-6 py-20 lg:py-28">
+    <div class="grid lg:grid-cols-12 gap-10 mb-14">
+      <div class="lg:col-span-5 reveal">
+        <div class="text-[11px] tracking-[0.22em] uppercase text-ink-faint mb-4">02 — Specifications</div>
+        <h2 class="font-display text-[44px] lg:text-[56px] leading-[1] font-light">
+          Every number,<br><span class="italic">measured.</span>
+        </h2>
+      </div>
+      <div class="lg:col-span-6 lg:col-start-7 reveal flex items-end">
+        <p class="text-[15px] leading-[1.75] text-ink-soft max-w-[480px]">
+          Halo 03 is built around a single 6W LED module seated behind a spun brass reflector.
+          The arm holds its pose without springs; the base carries the electronics so the head
+          stays cool and light. Below, the figures as we measure them on the bench.
+        </p>
+      </div>
+    </div>
+
+    <!-- Spec grid -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-px bg-line border hairline rounded-[4px] overflow-hidden">
+      <!-- row -->
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Height</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">52<span class="text-[14px] text-ink-faint ml-1">cm</span></div>
+        <div class="text-[12px] text-ink-faint mt-2">Extended, shade to desk</div>
+      </div>
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Reach</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">38<span class="text-[14px] text-ink-faint ml-1">cm</span></div>
+        <div class="text-[12px] text-ink-faint mt-2">From base pivot</div>
+      </div>
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Base Ø</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">11<span class="text-[14px] text-ink-faint ml-1">cm</span></div>
+        <div class="text-[12px] text-ink-faint mt-2">Cast zinc, felt-lined</div>
+      </div>
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Shade Ø</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">9.2<span class="text-[14px] text-ink-faint ml-1">cm</span></div>
+        <div class="text-[12px] text-ink-faint mt-2">Spun 1mm brass</div>
+      </div>
+
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Light source</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">6<span class="text-[14px] text-ink-faint ml-1">W LED</span></div>
+        <div class="text-[12px] text-ink-faint mt-2">Integrated, replaceable module</div>
+      </div>
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Lumens</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">540<span class="text-[14px] text-ink-faint ml-1">lm</span></div>
+        <div class="text-[12px] text-ink-faint mt-2">At peak, 4000K</div>
+      </div>
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Color temp</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">2700<span class="text-[14px] text-ink-faint ml-1">–4000K</span></div>
+        <div class="text-[12px] text-ink-faint mt-2">Stepless, capacitive dial</div>
+      </div>
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">CRI</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">95</div>
+        <div class="text-[12px] text-ink-faint mt-2">R9 ≥ 50</div>
+      </div>
+
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Weight</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">2.4<span class="text-[14px] text-ink-faint ml-1">kg</span></div>
+        <div class="text-[12px] text-ink-faint mt-2">Counter-weighted base</div>
+      </div>
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Cord</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">2.0<span class="text-[14px] text-ink-faint ml-1">m</span></div>
+        <div class="text-[12px] text-ink-faint mt-2">Braided, USB-C PSU</div>
+      </div>
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Switch</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">Cap.</div>
+        <div class="text-[12px] text-ink-faint mt-2">Touch band on stem</div>
+      </div>
+      <div class="bg-bg p-6 reveal">
+        <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint">Warranty</div>
+        <div class="spec-num text-[34px] mt-2 leading-none">10<span class="text-[14px] text-ink-faint ml-1">yrs</span></div>
+        <div class="text-[12px] text-ink-faint mt-2">Repair pledge, parts guaranteed</div>
+      </div>
+    </div>
+
+    <!-- finishes + dims -->
+    <div class="grid lg:grid-cols-12 gap-10 mt-14">
+      <div class="lg:col-span-5 reveal">
+        <div class="text-[11px] tracking-[0.22em] uppercase text-ink-faint mb-4">Finishes</div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between border-b hairline pb-3">
+            <div class="flex items-center gap-3"><span class="swatch" style="background:#B8732A"></span><span class="text-[14px]">Burnished brass</span></div>
+            <span class="text-[13px] text-ink-faint">€385</span>
+          </div>
+          <div class="flex items-center justify-between border-b hairline pb-3">
+            <div class="flex items-center gap-3"><span class="swatch" style="background:#1A1815"></span><span class="text-[14px]">Lamp black</span></div>
+            <span class="text-[13px] text-ink-faint">€385</span>
+          </div>
+          <div class="flex items-center justify-between border-b hairline pb-3">
+            <div class="flex items-center gap-3"><span class="swatch" style="background:#D8CFB9"></span><span class="text-[14px]">Bone cream</span></div>
+            <span class="text-[13px] text-ink-faint">€410</span>
+          </div>
+          <div class="flex items-center justify-between border-b hairline pb-3">
+            <div class="flex items-center gap-3"><span class="swatch" style="background:#6B3A1F"></span><span class="text-[14px]">Oxblood bronze</span></div>
+            <span class="text-[13px] text-ink-faint">€410</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-7 reveal">
+        <div class="text-[11px] tracking-[0.22em] uppercase text-ink-faint mb-4">Dimensions</div>
+        <div class="dot-grid ring-line rounded-[4px] p-6 sm:p-10 relative">
+          <img src="https://picsum.photos/seed/vesper-dim-drawing/900/420" alt="Dimensional drawing of Halo 03" class="w-full h-[220px] sm:h-[300px] object-cover rounded-[3px] grayscale opacity-90 mix-blend-multiply">
+          <div class="mt-5 grid grid-cols-4 gap-4 text-center">
+            <div><div class="spec-num text-[20px]">52</div><div class="text-[10px] uppercase tracking-[0.14em] text-ink-faint mt-1">H · cm</div></div>
+            <div><div class="spec-num text-[20px]">38</div><div class="text-[10px] uppercase tracking-[0.14em] text-ink-faint mt-1">Reach · cm</div></div>
+            <div><div class="spec-num text-[20px]">11</div><div class="text-[10px] uppercase tracking-[0.14em] text-ink-faint mt-1">Base · cm</div></div>
+            <div><div class="spec-num text-[20px]">9.2</div><div class="text-[10px] uppercase tracking-[0.14em] text-ink-faint mt-1">Shade · cm</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IN DETAIL -->
+<section id="detail" class="relative z-10 bg-bg-alt/50 border-y hairline">
+  <div class="max-w-[1280px] mx-auto px-6 py-20 lg:py-28">
+    <div class="flex items-end justify-between mb-12 reveal">
+      <div>
+        <div class="text-[11px] tracking-[0.22em] uppercase text-ink-faint mb-4">03 — In detail</div>
+        <h2 class="font-display text-[40px] lg:text-[52px] leading-[1] font-light">Three things we <span class="italic">argued about</span>.</h2>
+      </div>
+      <div class="hidden md:block text-[13px] text-ink-faint max-w-[260px] text-right">A short list of decisions that took longer than they should have.</div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <article class="reveal">
+        <div class="overflow-hidden rounded-[4px] ring-line">
+          <img src="https://picsum.photos/seed/vesper-joint-detail/700/520" alt="Brass joint detail" class="w-full h-[300px] object-cover transition duration-700 hover:scale-[1.03]">
+        </div>
+        <div class="mt-5">
+          <div class="text-[11px] tracking-[0.18em] uppercase text-accent mb-2">i. The joint</div>
+          <h3 class="font-display text-[24px] leading-tight">Friction without springs.</h3>
+          <p class="text-[14px] text-ink-soft leading-[1.7] mt-3">A tapered brass collet sets the hold with a single set-screw. Adjust it once with a 2mm hex and the arm keeps its pose for a decade — no droop, no spring fatigue.</p>
+        </div>
+      </article>
+
+      <article class="reveal">
+        <div class="overflow-hidden rounded-[4px] ring-line">
+          <img src="https://picsum.photos/seed/vesper-shade-reflect/700/520" alt="Shade reflector detail" class="w-full h-[300px] object-cover transition duration-700 hover:scale-[1.03]">
+        </div>
+        <div class="mt-5">
+          <div class="text-[11px] tracking-[0.18em] uppercase text-accent mb-2">ii. The reflector</div>
+          <h3 class="font-display text-[24px] leading-tight">Spun, then hand-finished.</h3>
+          <p class="text-[14px] text-ink-soft leading-[1.7] mt-3">The shade is spun from a single disc of brass and linished by hand. The interior is left uncoated so it oxidises slowly — the pool of warm light deepens over years, not days.</p>
+        </div>
+      </article>
+
+      <article class="reveal">
+        <div class="overflow-hidden rounded-[4px] ring-line">
+          <img src="https://picsum.photos/seed/vesper-base-detail/700/520" alt="Base detail" class="w-full h-[300px] object-cover transition duration-700 hover:scale-[1.03]">
+        </div>
+        <div class="mt-5">
+          <div class="text-[11px] tracking-[0.18em] uppercase text-accent mb-2">iii. The base</div>
+          <h3 class="font-display text-[24px] leading-tight">Weight where it earns it.</h3>
+          <p class="text-[14px] text-ink-soft leading-[1.7] mt-3">Cast zinc, 1.1kg of the lamp's 2.4kg sits in the base. The driver lives there too, keeping the head cool and the shade small. Felt underside, because desks deserve it.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- STORY / ATELIER -->
+<section id="story" class="relative z-10">
+  <div class="max-w-[1280px] mx-auto px-6 py-20 lg:py-28">
+    <div class="grid lg:grid-cols-12 gap-10 items-center">
+      <div class="lg:col-span-6 reveal">
+        <div class="overflow-hidden rounded-[4px] ring-line">
+          <img src="https://picsum.photos/seed/vesper-atelier-bench/900/700" alt="The Studio Vesper atelier bench" class="w-full h-[360px] lg:h-[520px] object-cover">
+        </div>
+      </div>
+      <div class="lg:col-span-5 lg:col-start-8 reveal">
+        <div class="text-[11px] tracking-[0.22em] uppercase text-ink-faint mb-4">04 — Atelier</div>
+        <h2 class="font-display text-[40px] lg:text-[52px] leading-[1.02] font-light">A bench, two people, <span class="italic">one lamp a day</span>.</h2>
+        <p class="text-[15px] leading-[1.75] text-ink-soft mt-6">
+          Studio Vesper is Inês and Tomás. We assemble, wire and weigh every Halo 03 at a bench in
+          Marvila, Lisbon. Output is deliberately small — about one lamp leaves the studio per day —
+          so we can keep the parts inventory open and repair anything we've ever made.
+        </p>
+        <div class="mt-8 grid grid-cols-3 gap-6 border-t hairline pt-6">
+          <div>
+            <div class="spec-num text-[28px]">2019</div>
+            <div class="text-[11px] uppercase tracking-[0.14em] text-ink-faint mt-1">Founded</div>
+          </div>
+          <div>
+            <div class="spec-num text-[28px]">2</div>
+            <div class="text-[11px] uppercase tracking-[0.14em] text-ink-faint mt-1">Makers</div>
+          </div>
+          <div>
+            <div class="spec-num text-[28px]">1/day</div>
+            <div class="text-[11px] uppercase tracking-[0.14em] text-ink-faint mt-1">Pace</div>
+          </div>
+        </div>
+        <a href="#" class="inline-flex items-center gap-2 mt-8 text-[13px] tracking-wide border-b border-ink pb-1 hover:text-accent hover:border-accent transition">Read the studio journal <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA strip -->
+<section class="relative z-10 bg-ink text-[#F2EEE5]">
+  <div class="max-w-[1280px] mx-auto px-6 py-16 lg:py-20 grid lg:grid-cols-12 gap-8 items-center">
+    <div class="lg:col-span-7 reveal">
+      <h2 class="font-display text-[40px] lg:text-[54px] leading-[1.02] font-light">A lamp you'll <span class="italic">keep adjusting</span>, on purpose.</h2>
+      <p class="text-[14.5px] text-[#C9C2B0] mt-4 max-w-[520px] leading-[1.7]">Build yours in four finishes, ship it anywhere, and we'll repair it for a decade. Free returns within 30 days.</p>
+    </div>
+    <div class="lg:col-span-5 reveal flex flex-col sm:flex-row gap-3 lg:justify-end">
+      <button class="btn-ink rounded-full px-7 py-3.5 text-[13.5px] tracking-wide flex items-center justify-center gap-2.5" style="background:#F2EEE5;color:#1A1815">
+        Add Halo 03 — €385 <i class="fa-solid fa-arrow-right text-[11px]"></i>
+      </button>
+      <button class="rounded-full px-7 py-3.5 text-[13.5px] tracking-wide border border-[#5a5347] hover:bg-white/5 transition">Book a video viewing</button>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="relative z-10 border-t hairline">
+  <div class="max-w-[1280px] mx-auto px-6 py-14 grid md:grid-cols-12 gap-10">
+    <div class="md:col-span-5">
+      <div class="flex items-center gap-2.5">
+        <span class="w-7 h-7 rounded-full bg-ink grid place-items-center">
+          <span class="w-2.5 h-2.5 rounded-full bg-accent-soft"></span>
+        </span>
+        <span class="font-display text-[19px] font-medium">Studio Vesper</span>
+      </div>
+      <p class="text-[13.5px] text-ink-soft mt-4 max-w-[320px] leading-[1.7]">Small-batch lighting and objects from a bench in Marvila, Lisbon. Made to be repaired.</p>
+    </div>
+    <div class="md:col-span-2">
+      <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint mb-3">Shop</div>
+      <ul class="space-y-2 text-[13.5px] text-ink-soft">
+        <li><a href="#" class="hover:text-ink">Halo 03</a></li>
+        <li><a href="#" class="hover:text-ink">Halo 01</a></li>
+        <li><a href="#" class="hover:text-ink">Accessories</a></li>
+        <li><a href="#" class="hover:text-ink">Gift card</a></li>
+      </ul>
+    </div>
+    <div class="md:col-span-2">
+      <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint mb-3">Studio</div>
+      <ul class="space-y-2 text-[13.5px] text-ink-soft">
+        <li><a href="#" class="hover:text-ink">Journal</a></li>
+        <li><a href="#" class="hover:text-ink">Atelier visit</a></li>
+        <li><a href="#" class="hover:text-ink">Press</a></li>
+        <li><a href="#" class="hover:text-ink">Repair pledge</a></li>
+      </ul>
+    </div>
+    <div class="md:col-span-3">
+      <div class="text-[11px] uppercase tracking-[0.16em] text-ink-faint mb-3">Letters from the bench</div>
+      <p class="text-[13px] text-ink-soft mb-3">A quiet note when something new leaves the studio.</p>
+      <form class="flex border hairline rounded-full overflow-hidden bg-bg">
+        <input type="email" placeholder="you@studio.com" class="flex-1 px-4 py-2.5 text-[13px] bg-transparent outline-none placeholder:text-ink-faint">
+        <button class="bg-ink text-[#F2EEE5] px-4 text-[12px] tracking-wide">Join</button>
+      </form>
+    </div>
+  </div>
+  <div class="border-t hairline">
+    <div class="max-w-[1280px] mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-ink-faint">
+      <span>© 2024 Studio Vesper · Rua do Açúcar 12, 1950-009 Lisboa</span>
+      <div class="flex items-center gap-5">
+        <a href="#" class="hover:text-ink">Privacy</a>
+        <a href="#" class="hover:text-ink">Terms</a>
+        <a href="#" class="hover:text-ink">Shipping</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- THREE.JS LAMP SCENE -->
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const container = document.getElementById('lamp-canvas');
+const loaderEl = document.getElementById('lamp-loader');
+const resetBtn = document.getElementById('reset-view');
+
+// ---- Scene / camera / renderer ----
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+  34,
+  Math.max(1, container.clientWidth) / Math.max(1, container.clientHeight),
+  0.1,
+  100
+);
+const initialCam = new THREE.Vector3(5.6, 3.1, 6.4);
+camera.position.copy(initialCam);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.08;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+container.appendChild(renderer.domElement);
+
+// ---- Controls ----
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(0, 2.0, 0);
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.9;
+controls.minDistance = 5;
+controls.maxDistance = 12;
+controls.minPolarAngle = 0.35;
+controls.maxPolarAngle = Math.PI / 2 - 0.04;
+controls.enablePan = false;
+
+// ---- Lighting ----
+const ambient = new THREE.AmbientLight(0xfff0d8, 0.32);
+scene.add(ambient);
+
+const hemi = new THREE.HemisphereLight(0xfff3df, 0xb89a64, 0.35);
+scene.add(hemi);
+
+const keyLight = new THREE.DirectionalLight(0xfff2dc, 1.15);
+keyLight.position.set(4.5, 8.5, 5);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(2048, 2048);
+keyLight.shadow.camera.near = 0.5;
+keyLight.shadow.camera.far = 30;
+keyLight.shadow.camera.left = -7;
+keyLight.shadow.camera.right = 7;
+keyLight.shadow.camera.top = 7;
+keyLight.shadow.camera.bottom = -7;
+keyLight.shadow.bias = -0.00025;
+keyLight.shadow.normalBias = 0.02;
+scene.add(keyLight);
+
+const rimLight = new THREE.DirectionalLight(0xb8732a, 0.55);
+rimLight.position.set(-5, 3.5, -4);
+scene.add(rimLight);
+
+const fillLight = new THREE.DirectionalLight(0xd4a04c, 0.22);
+fillLight.position.set(-3, 2, 5);
+scene.add(fillLight);
+
+// ---- Ground (shadow catcher over CSS gradient) ----
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(9, 64),
+  new THREE.ShadowMaterial({ opacity: 0.3 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = 0;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// A faint warm disc to suggest a desk surface reflection
+const disc = new THREE.Mesh(
+  new THREE.CircleGeometry(3.2, 64),
+  new THREE.MeshBasicMaterial({ color: 0xe8d9b8, transparent: true, opacity: 0.18 })
+);
+disc.rotation.x = -Math.PI / 2;
+disc.position.y = 0.001;
+scene.add(disc);
+
+// ---- Materials ----
+const darkMat = new THREE.MeshStandardMaterial({ color: 0x1f1c19, roughness: 0.34, metalness: 0.62 });
+const brassMat = new THREE.MeshStandardMaterial({ color: 0xb8732a, roughness: 0.28, metalness: 0.88 });
+const brassDarkMat = new THREE.MeshStandardMaterial({ color: 0x8a5418, roughness: 0.38, metalness: 0.82 });
+const creamMat = new THREE.MeshStandardMaterial({ color: 0xf2e6c8, roughness: 0.62, metalness: 0.08, side: THREE.BackSide });
+
+// ---- Lamp group ----
+const lamp = new THREE.Group();
+scene.add(lamp);
+
+// Base
+const base = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.35, 0.16, 64), darkMat);
+base.position.y = 0.08;
+base.castShadow = true; base.receiveShadow = true;
+lamp.add(base);
+
+const baseRing = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.15, 0.05, 64), brassMat);
+baseRing.position.y = 0.185;
+baseRing.castShadow = true;
+lamp.add(baseRing);
+
+const baseRecess = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.78, 0.03, 48), brassDarkMat);
+baseRecess.position.y = 0.215;
+lamp.add(baseRecess);
+
+// Stem
+const post = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.15, 0.42, 32), darkMat);
+post.position.y = 0.41;
+post.castShadow = true;
+lamp.add(post);
+
+// Capacitive touch band on stem
+const touchBand = new THREE.Mesh(new THREE.CylinderGeometry(0.152, 0.152, 0.06, 32), brassMat);
+touchBand.position.y = 0.52;
+lamp.add(touchBand);
+
+// ---- Lower arm pivot ----
+const lowerPivot = new THREE.Group();
+lowerPivot.position.set(0, 0.62, 0);
+lamp.add(lowerPivot);
+
+const joint1 = new THREE.Mesh(new THREE.SphereGeometry(0.14, 32, 24), brassDarkMat);
+joint1.castShadow = true;
+lowerPivot.add(joint1);
+
+const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 2.1, 24), darkMat);
+lowerArm.position.y = 1.05;
+lowerArm.castShadow = true;
+lowerPivot.add(lowerArm);
+
+// subtle brass accent ring on lower arm
+const lowerAccent = new THREE.Mesh(new THREE.CylinderGeometry(0.082, 0.082, 0.04, 24), brassMat);
+lowerAccent.position.y = 1.6;
+lowerPivot.add(lowerAccent);
+
+lowerPivot.rotation.x = 0.35; // tilt top toward viewer
+
+// ---- Upper arm pivot ----
+const upperPivot = new THREE.Group();
+upperPivot.position.set(0, 2.1, 0);
+lowerPivot.add(upperPivot);
+
+const joint2 = new THREE.Mesh(new THREE.SphereGeometry(0.13, 32, 24), brassDarkMat);
+joint2.castShadow = true;
+upperPivot.add(joint2);
+
+const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 1.7, 24), darkMat);
+upperArm.position.y = 0.85;
+upperArm.castShadow = true;
+upperPivot.add(upperArm);
+
+const upperAccent = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.072, 0.035, 24), brassMat);
+upperAccent.position.y = 1.25;
+upperPivot.add(upperAccent);
+
+upperPivot.rotation.x = -0.55; // tilt back, creating the anglepoise zig-zag
+
+// ---- Shade group ----
+const shadeGroup = new THREE.Group();
+shadeGroup.position.set(0, 1.7, 0);
+upperPivot.add(shadeGroup);
+
+const joint3 = new THREE.Mesh(new THREE.SphereGeometry(0.11, 32, 24), brassDarkMat);
+joint3.castShadow = true;
+shadeGroup.add(joint3);
+
+// Shade — truncated cone, open at the bottom
+const shade = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.62, 0.92, 0.78, 48, 1, true),
+  brassMat
+);
+shade.position.y = 0.06;
+shade.castShadow = true;
+shadeGroup.add(shade);
+
+// Shade interior (cream reflector)
+const shadeInner = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.6, 0.9, 0.76, 48, 1, true),
+  creamMat
+);
+shadeInner.position.y = 0.06;
+shadeGroup.add(shadeInner);
+
+// Shade bottom rim
+const shadeRim = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.022, 16, 48), brassDarkMat);
+shadeRim.rotation.x = Math.PI / 2;
+shadeRim.position.y = -0.33;
+shadeGroup.add(shadeRim);
+
+// Shade top cap
+const shadeCap = new THREE.Mesh(new THREE.CircleGeometry(0.62, 48), brassDarkMat);
+shadeCap.rotation.x = -Math.PI / 2;
+shadeCap.position.y = 0.45;
+shadeGroup.add(shadeCap);
+
+// Finial on top
+const finial = new THREE.Mesh(new THREE.SphereGeometry(0.07, 24, 16), brassDarkMat);
+finial.position.y = 0.52;
+shadeGroup.add(finial);
+
+// Bulb
+const bulbMat = new THREE.MeshStandardMaterial({
+  color: 0xfff0c0,
+  emissive: 0xffc868,
+  emissiveIntensity: 2.6,
+  roughness: 0.18
+});
+const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.2, 32, 24), bulbMat);
+bulb.position.y = -0.14;
+shadeGroup.add(bulb);
+
+// Bulb glow halo (sprite-like)
+const glowGeo = new THREE.SphereGeometry(0.34, 24, 16);
+const glowMat = new THREE.MeshBasicMaterial({ color: 0xffd08a, transparent: true, opacity: 0.16 });
+const glow = new THREE.Mesh(glowGeo, glowMat);
+glow.position.y = -0.14;
+shadeGroup.add(glow);
+
+// Point light inside the shade
+const bulbLight = new THREE.PointLight(0xffce7a, 7, 9, 1.7);
+bulbLight.position.y = -0.12;
+shadeGroup.add(bulbLight);
+
+// Spotlight from the bulb, pointing down-forward onto the desk
+const spot = new THREE.SpotLight(0xffd49a, 16, 11, Math.PI * 0.22, 0.5, 1.4);
+spot.position.set(0, -0.12, 0);
+spot.target.position.set(0.1, -5.5, 1.6);
+shadeGroup.add(spot);
+shadeGroup.add(spot.target);
+spot.castShadow = true;
+spot.shadow.mapSize.set(1024, 1024);
+spot.shadow.bias = -0.0006;
+spot.shadow.camera.near = 0.3;
+spot.shadow.camera.far = 12;
+
+// Orient shade so the opening faces down and slightly forward
+shadeGroup.rotation.x = -0.25;
+
+// ---- Resize handling ----
+function resize() {
+  const w = Math.max(1, container.clientWidth);
+  const h = Math.max(1, container.clientHeight);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+const ro = new ResizeObserver(resize);
+ro.observe(container);
+window.addEventListener('resize', resize);
+
+// ---- Reset view ----
+resetBtn.addEventListener('click', () => {
+  controls.target.set(0, 2.0, 0);
+  camera.position.copy(initialCam);
+  controls.update();
+});
+
+// ---- Pause auto-rotate while dragging, resume after ----
+let autoTimer;
+controls.addEventListener('start', () => { controls.autoRotate = false; clearTimeout(autoTimer); });
+controls.addEventListener('end', () => { autoTimer = setTimeout(() => { controls.autoRotate = true; }, 2200); });
+
+// ---- Animate ----
+const clock = new THREE.Clock();
+function animate() {
+  const t = clock.getElapsedTime();
+  // gentle bulb flicker / breathing
+  bulbMat.emissiveIntensity = 2.4 + Math.sin(t * 1.6) * 0.12;
+  glowMat.opacity = 0.14 + Math.sin(t * 1.6) * 0.02;
+  bulbLight.intensity = 6.6 + Math.sin(t * 1.6) * 0.4;
+
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+// Kick off
+resize();
+animate();
+
+// Hide loader once first frame is committed
+requestAnimationFrame(() => {
+  setTimeout(() => loaderEl.classList.add('hidden'), 250);
+});
+
+// ---- Scroll reveal ----
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>

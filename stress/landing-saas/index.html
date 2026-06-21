@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cadence — Meeting notes that actually get done</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#F4F1EC', 'paper-2': '#ECE7DE', ink: '#16140F', 'ink-2': '#2A2620',
+          muted: '#6B665B', accent: '#E04E2B', 'accent-soft': '#FBE4DC',
+          forest: '#1F3D2E', 'forest-soft': '#DDE6DF', line: '#D9D2C5',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'], sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; background: #F4F1EC; color: #16140F; -webkit-font-smoothing: antialiased; }
+  .font-display { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  .grain::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity: 0.08; pointer-events: none; mix-blend-mode: overlay;
+  }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-up { animation: fadeUp 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .d-1 { animation-delay: 0.08s; } .d-2 { animation-delay: 0.16s; }
+  .d-3 { animation-delay: 0.24s; } .d-4 { animation-delay: 0.32s; }
+
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2,0.7,0.2,1); }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  .mock-shadow { box-shadow: 0 1px 2px rgba(22,20,15,0.04), 0 10px 28px -10px rgba(22,20,15,0.14), 0 30px 70px -24px rgba(22,20,15,0.20); }
+  .mock-shadow-sm { box-shadow: 0 1px 2px rgba(22,20,15,0.04), 0 4px 14px -4px rgba(22,20,15,0.10); }
+
+  .check-box { width: 16px; height: 16px; border: 1.5px solid #B8B0A0; border-radius: 4px; flex-shrink: 0; }
+  .check-box.done { background: #1F3D2E; border-color: #1F3D2E; position: relative; }
+  .check-box.done::after { content: ''; position: absolute; left: 4px; top: 1px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.85); } }
+  .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+  .nav-scrolled { background: rgba(244, 241, 236, 0.82); backdrop-filter: blur(14px); border-bottom: 1px solid #D9D2C5; }
+
+  ::selection { background: #E04E2B; color: #fff; }
+  button:focus-visible, a:focus-visible { outline: 2px solid #E04E2B; outline-offset: 2px; border-radius: 6px; }
+
+  .card-hover { transition: transform 0.4s cubic-bezier(0.2,0.7,0.2,1), border-color 0.3s ease, box-shadow 0.4s ease; }
+  .card-hover:hover { transform: translateY(-4px); }
+</style>
+</head>
+<body class="bg-paper text-ink">
+
+<!-- NAV -->
+<nav id="nav" class="fixed top-0 inset-x-0 z-50 transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2.5">
+      <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <rect x="3" y="10" width="4" height="8" rx="1" fill="#16140F"/>
+        <rect x="12" y="5" width="4" height="18" rx="1" fill="#E04E2B"/>
+        <rect x="21" y="12" width="4" height="4" rx="1" fill="#16140F"/>
+      </svg>
+      <span class="font-display text-xl font-semibold tracking-tight">Cadence</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm text-ink-2">
+      <a href="#features" class="hover:text-accent transition-colors">Product</a>
+      <a href="#customers" class="hover:text-accent transition-colors">Customers</a>
+      <a href="#" class="hover:text-accent transition-colors">Pricing</a>
+      <a href="#" class="hover:text-accent transition-colors">Changelog</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="#" class="hidden sm:inline-block text-sm font-medium text-ink-2 hover:text-ink transition-colors">Sign in</a>
+      <a href="#" class="inline-flex items-center gap-2 bg-ink text-paper text-sm font-medium px-4 py-2 rounded-full hover:bg-ink-2 transition-colors">
+        Start free <i class="fa-solid fa-arrow-right text-xs"></i>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="relative pt-32 lg:pt-40 pb-20 lg:pb-28 overflow-hidden">
+  <div class="absolute top-20 -right-32 w-96 h-96 bg-accent-soft rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+  <div class="absolute bottom-0 -left-32 w-96 h-96 bg-forest-soft rounded-full blur-3xl opacity-40 pointer-events-none"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-10 grid lg:grid-cols-12 gap-14 lg:gap-10 items-center">
+    <!-- Copy -->
+    <div class="lg:col-span-6">
+      <div class="fade-up inline-flex items-center gap-2 bg-paper-2 border border-line rounded-full pl-1.5 pr-3 py-1 text-xs font-medium text-ink-2 mb-7">
+        <span class="bg-accent text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">NEW</span>
+        <span>Cadence 2.0 — now with live meeting capture</span>
+      </div>
+
+      <h1 class="fade-up d-1 font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.98] tracking-tight font-medium">
+        Meeting notes that <span class="italic font-normal text-accent">actually</span> get done.
+      </h1>
+
+      <p class="fade-up d-2 mt-6 text-lg text-muted max-w-xl leading-relaxed">
+        Cadence listens to your meetings, pulls out the decisions, and turns the talk into tracked action items — with owners, deadlines, and two-way sync to the tools your team already lives in.
+      </p>
+
+      <div class="fade-up d-3 mt-8 flex flex-col sm:flex-row gap-3">
+        <a href="#" class="inline-flex items-center justify-center gap-2 bg-accent text-white font-medium px-6 py-3.5 rounded-full hover:bg-[#c8401f] transition-colors">
+          Start free <i class="fa-solid fa-arrow-right text-sm"></i>
+        </a>
+        <a href="#" class="inline-flex items-center justify-center gap-2 bg-white border border-line text-ink font-medium px-6 py-3.5 rounded-full hover:border-ink/30 transition-colors">
+          <i class="fa-solid fa-play text-xs text-accent"></i> Watch 2-min demo
+        </a>
+      </div>
+
+      <div class="fade-up d-4 mt-10 flex items-center gap-4">
+        <div class="flex -space-x-2.5">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=faces" class="w-8 h-8 rounded-full border-2 border-paper object-cover" alt="">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=faces" class="w-8 h-8 rounded-full border-2 border-paper object-cover" alt="">
+          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=faces" class="w-8 h-8 rounded-full border-2 border-paper object-cover" alt="">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=faces" class="w-8 h-8 rounded-full border-2 border-paper object-cover" alt="">
+        </div>
+        <div class="text-sm">
+          <div class="flex items-center gap-1 text-accent">
+            <i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i>
+            <span class="ml-1 font-semibold text-ink">4.9</span>
+          </div>
+          <div class="text-muted">Loved by 4,000+ product teams</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product mockup -->
+    <div class="lg:col-span-6 fade-up d-2">
+      <div class="relative">
+        <!-- Raw notes (behind) -->
+        <div class="absolute -top-5 -left-4 w-full bg-paper-2 border border-line rounded-2xl p-5 -rotate-[4deg] mock-shadow-sm opacity-90 hidden sm:block z-0">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-microphone text-muted text-xs"></i>
+              <span class="text-xs font-mono text-muted">raw_transcript.txt</span>
+            </div>
+            <span class="text-[10px] font-mono text-muted">47:12</span>
+          </div>
+          <div class="space-y-1.5 text-xs text-muted leading-relaxed font-mono">
+            <p>…so the redesign needs to ship before the</p>
+            <p>20th, maya's owning it. dev can you look</p>
+            <p>at the pricing analytics thing? that's</p>
+            <p>pretty urgent. and someone's gotta write</p>
+            <p>up the Q4 OKRs, sara said she'd take a</p>
+            <p>first pass by next wednesday…</p>
+          </div>
+        </div>
+
+        <!-- Action items (front) -->
+        <div class="relative bg-white border border-line rounded-2xl mock-shadow overflow-hidden z-10">
+          <div class="flex items-center justify-between px-5 py-3.5 border-b border-line bg-paper">
+            <div class="flex items-center gap-2.5">
+              <div class="flex gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#E04E2B]/30"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#E04E2B]/30"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#E04E2B]/30"></span>
+              </div>
+              <span class="text-sm font-medium ml-2">Q3 Planning Sync</span>
+            </div>
+            <span class="flex items-center gap-1.5 text-[11px] font-mono text-forest">
+              <span class="w-1.5 h-1.5 rounded-full bg-forest pulse-dot"></span> Synced
+            </span>
+          </div>
+
+          <div class="p-5">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-muted">Action items</span>
+              <span class="text-[11px] font-mono text-muted">3 extracted</span>
+            </div>
+
+            <div class="space-y-2.5">
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-paper">
+                <div class="check-box mt-0.5"></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-ink">Ship onboarding redesign v2</p>
+                  <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                    <span class="inline-flex items-center gap-1 text-[11px] text-muted">
+                      <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop&crop=faces" class="w-4 h-4 rounded-full object-cover" alt=""> Maya Chen
+                    </span>
+                    <span class="text-[11px] text-muted">·</span>
+                    <span class="inline-flex items-center gap-1 text-[11px] text-muted"><i class="fa-regular fa-calendar text-[10px]"></i> Fri, Oct 20</span>
+                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-accent-soft text-accent">Design</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-paper">
+                <div class="check-box mt-0.5"></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-ink">Audit pricing page analytics</p>
+                  <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                    <span class="inline-flex items-center gap-1 text-[11px] text-muted">
+                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=faces" class="w-4 h-4 rounded-full object-cover" alt=""> Dev Patel
+                    </span>
+                    <span class="text-[11px] text-muted">·</span>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-medium text-accent"><i class="fa-regular fa-calendar text-[10px]"></i> Mon, Oct 23</span>
+                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-accent-soft text-accent">Growth</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-paper">
+                <div class="check-box done mt-0.5"></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-muted line-through">Draft Q4 OKR proposal</p>
+                  <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                    <span class="inline-flex items-center gap-1 text-[11px] text-muted">
+                      <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=faces" class="w-4 h-4 rounded-full object-cover" alt=""> Sara Liu
+                    </span>
+                    <span class="text-[11px] text-muted">·</span>
+                    <span class="inline-flex items-center gap-1 text-[11px] text-forest"><i class="fa-solid fa-check text-[10px]"></i> Done · Wed</span>
+                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-forest-soft text-forest">Strategy</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-line flex items-center justify-between">
+              <div class="flex items-center gap-3 text-[11px] text-muted">
+                <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-bolt text-accent"></i> Synced to Linear</span>
+                <span class="inline-flex items-center gap-1.5"><i class="fa-brands fa-slack text-[#611f69]"></i> Slack notified</span>
+              </div>
+              <button class="text-[11px] font-medium text-ink hover:text-accent transition-colors">View all →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating stat -->
+        <div class="absolute -bottom-5 -right-2 sm:-right-4 bg-ink text-paper rounded-xl px-3.5 py-2.5 mock-shadow-sm flex items-center gap-2.5 z-20">
+          <div class="w-7 h-7 rounded-lg bg-forest flex items-center justify-center">
+            <i class="fa-solid fa-check text-white text-xs"></i>
+          </div>
+          <div>
+            <div class="text-[10px] font-mono text-paper/60 uppercase tracking-wider">closure rate</div>
+            <div class="text-sm font-semibold">+38% this quarter</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGO CLOUD -->
+<section id="customers" class="border-y border-line bg-paper-2/50 py-12">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <p class="text-center text-xs font-mono uppercase tracking-[0.2em] text-muted mb-8">Trusted by teams that ship</p>
+    <div class="flex flex-wrap items-center justify-center gap-x-10 gap-y-6 lg:gap-x-16">
+      <div class="flex items-center gap-2 text-ink/65 hover:text-ink transition-colors"><i class="fa-solid fa-compass text-lg"></i><span class="font-display text-lg font-semibold tracking-tight">Northwind</span></div>
+      <div class="flex items-center gap-2 text-ink/65 hover:text-ink transition-colors"><i class="fa-solid fa-cube text-lg"></i><span class="font-display text-lg font-semibold tracking-tight">Cobalt</span></div>
+      <div class="flex items-center gap-2 text-ink/65 hover:text-ink transition-colors"><i class="fa-solid fa-mountain text-lg"></i><span class="font-display text-lg font-semibold tracking-tight">Meridian</span></div>
+      <div class="flex items-center gap-2 text-ink/65 hover:text-ink transition-colors"><i class="fa-solid fa-tree text-lg"></i><span class="font-display text-lg font-semibold tracking-tight">Foresta</span></div>
+      <div class="flex items-center gap-2 text-ink/65 hover:text-ink transition-colors"><i class="fa-solid fa-gem text-lg"></i><span class="font-display text-lg font-semibold tracking-tight">Quartz</span></div>
+      <div class="flex items-center gap-2 text-ink/65 hover:text-ink transition-colors"><i class="fa-solid fa-feather text-lg"></i><span class="font-display text-lg font-semibold tracking-tight">Halcyon</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="py-24 lg:py-32">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="max-w-2xl mb-16 reveal">
+      <span class="text-xs font-mono uppercase tracking-[0.2em] text-accent">How it works</span>
+      <h2 class="font-display text-4xl lg:text-5xl tracking-tight font-medium mt-3 leading-tight">
+        From an hour of talk to a week of momentum.
+      </h2>
+      <p class="text-muted text-lg mt-4 leading-relaxed">
+        Three things happen between the moment your meeting ends and the moment your team gets back to work.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
+      <div class="reveal card-hover group bg-white border border-line rounded-2xl p-7 hover:border-ink/20">
+        <div class="w-12 h-12 rounded-xl bg-accent-soft text-accent flex items-center justify-center mb-6 group-hover:bg-accent group-hover:text-white transition-colors">
+          <i class="fa-solid fa-filter text-lg"></i>
+        </div>
+        <div class="text-[11px] font-mono uppercase tracking-wider text-muted mb-2">01 · Distill</div>
+        <h3 class="font-display text-2xl font-medium tracking-tight mb-3">Cuts the noise.</h3>
+        <p class="text-muted leading-relaxed">
+          Cadence reads the rambling transcript and pulls out only what matters — decisions, risks, open questions, and follow-ups. The rest gets archived, not lost.
+        </p>
+        <div class="mt-5 pt-5 border-t border-line text-xs font-mono text-muted">
+          <span class="text-ink font-medium">~92%</span> of notes flagged as talk-only
+        </div>
+      </div>
+
+      <div class="reveal card-hover group bg-white border border-line rounded-2xl p-7 hover:border-ink/20" style="transition-delay:0.1s">
+        <div class="w-12 h-12 rounded-xl bg-forest-soft text-forest flex items-center justify-center mb-6 group-hover:bg-forest group-hover:text-white transition-colors">
+          <i class="fa-solid fa-user-check text-lg"></i>
+        </div>
+        <div class="text-[11px] font-mono uppercase tracking-wider text-muted mb-2">02 · Assign</div>
+        <h3 class="font-display text-2xl font-medium tracking-tight mb-3">Owns the follow-through.</h3>
+        <p class="text-muted leading-relaxed">
+          Every action item lands on a real person with a real deadline, inferred from who said what. No more "we should" or "someone needs to." Just owners.
+        </p>
+        <div class="mt-5 pt-5 border-t border-line text-xs font-mono text-muted">
+          <span class="text-ink font-medium">0</span> orphaned tasks, guaranteed
+        </div>
+      </div>
+
+      <div class="reveal card-hover group bg-white border border-line rounded-2xl p-7 hover:border-ink/20" style="transition-delay:0.2s">
+        <div class="w-12 h-12 rounded-xl bg-ink/5 text-ink flex items-center justify-center mb-6 group-hover:bg-ink group-hover:text-paper transition-colors">
+          <i class="fa-solid fa-plug text-lg"></i>
+        </div>
+        <div class="text-[11px] font-mono uppercase tracking-wider text-muted mb-2">03 · Sync</div>
+        <h3 class="font-display text-2xl font-medium tracking-tight mb-3">Lives where you work.</h3>
+        <p class="text-muted leading-relaxed">
+          Two-way sync with Linear, Jira, Asana, Notion, and Slack. Status changes flow back into Cadence, so your meeting recap is never out of date.
+        </p>
+        <div class="mt-5 pt-5 border-t border-line flex items-center gap-3 text-muted">
+          <i class="fa-brands fa-slack"></i><i class="fa-solid fa-bolt"></i><i class="fa-regular fa-square-check"></i>
+          <span class="text-xs font-mono">+ 8 more</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="py-24 lg:py-32 bg-paper-2/60 border-y border-line">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14 reveal">
+      <div class="max-w-2xl">
+        <span class="text-xs font-mono uppercase tracking-[0.2em] text-accent">Field notes</span>
+        <h2 class="font-display text-4xl lg:text-5xl tracking-tight font-medium mt-3 leading-tight">
+          Teams that stopped taking notes by hand.
+        </h2>
+      </div>
+      <p class="text-muted max-w-sm leading-relaxed">A few words from the people who let Cadence sit in on their standups, planning syncs, and customer calls.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <figure class="reveal bg-white border border-line rounded-2xl p-7 flex flex-col">
+        <div class="flex items-center gap-1 text-accent mb-5">
+          <i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i>
+        </div>
+        <blockquote class="font-display text-xl leading-snug tracking-tight flex-1">
+          "We cut our weekly planning meeting from 90 minutes to 45. The second half used to be us arguing about who said they'd do what. Cadence just… settles it."
+        </blockquote>
+        <figcaption class="mt-6 pt-6 border-t border-line flex items-center gap-3">
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&h=120&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover" alt="">
+          <div>
+            <div class="font-medium text-sm">Priya Raman</div>
+            <div class="text-xs text-muted">VP Product, Northwind</div>
+          </div>
+        </figcaption>
+      </figure>
+
+      <figure class="reveal bg-white border border-line rounded-2xl p-7 flex flex-col" style="transition-delay:0.1s">
+        <div class="flex items-center gap-1 text-accent mb-5">
+          <i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i>
+        </div>
+        <blockquote class="font-display text-xl leading-snug tracking-tight flex-1">
+          "The thing that sold me: action items actually close. We went from 'yeah someone's on that' to a 70% completion rate inside two weeks. Slightly embarrassing how bad we were before."
+        </blockquote>
+        <figcaption class="mt-6 pt-6 border-t border-line flex items-center gap-3">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover" alt="">
+          <div>
+            <div class="font-medium text-sm">Marcus Feld</div>
+            <div class="text-xs text-muted">Eng Lead, Cobalt</div>
+          </div>
+        </figcaption>
+      </figure>
+
+      <figure class="reveal bg-white border border-line rounded-2xl p-7 flex flex-col" style="transition-delay:0.2s">
+        <div class="flex items-center gap-1 text-accent mb-5">
+          <i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i>
+        </div>
+        <blockquote class="font-display text-xl leading-snug tracking-tight flex-1">
+          "I stopped being the human notetaker. That alone is worth it. But the Linear sync means I actually trust the recap when I open it Monday — nothing's stale."
+        </blockquote>
+        <figcaption class="mt-6 pt-6 border-t border-line flex items-center gap-3">
+          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&h=120&fit=crop&crop=faces" class="w-11 h-11 rounded-full object-cover" alt="">
+          <div>
+            <div class="font-medium text-sm">Sara Liu</div>
+            <div class="text-xs text-muted">Head of Ops, Meridian</div>
+          </div>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-24 lg:py-32">
+  <div class="max-w-5xl mx-auto px-6 lg:px-10">
+    <div class="relative grain bg-ink text-paper rounded-3xl px-8 py-16 lg:px-16 lg:py-20 overflow-hidden">
+      <div class="absolute -top-20 -right-20 w-72 h-72 bg-accent/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-20 -left-20 w-72 h-72 bg-forest/30 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative max-w-2xl">
+        <h2 class="font-display text-4xl lg:text-5xl tracking-tight font-medium leading-[1.05]">
+          Your next meeting could end with a to-do list that <span class="italic text-accent">writes itself.</span>
+        </h2>
+        <p class="text-paper/70 text-lg mt-5 leading-relaxed">
+          Free for 14 days. No credit card. Connect your calendar and run your next sync through Cadence — see the difference in one meeting.
+        </p>
+        <div class="mt-8 flex flex-col sm:flex-row gap-3">
+          <a href="#" class="inline-flex items-center justify-center gap-2 bg-accent text-white font-medium px-6 py-3.5 rounded-full hover:bg-[#c8401f] transition-colors">
+            Start free <i class="fa-solid fa-arrow-right text-sm"></i>
+          </a>
+          <a href="#" class="inline-flex items-center justify-center gap-2 border border-paper/20 text-paper font-medium px-6 py-3.5 rounded-full hover:bg-paper/10 transition-colors">
+            Book a walkthrough
+          </a>
+        </div>
+        <div class="mt-6 flex flex-wrap items-center gap-5 text-xs text-paper/50 font-mono">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-check"></i> SOC 2 Type II</span>
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-check"></i> GDPR ready</span>
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-check"></i> Cancel anytime</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-ink text-paper/70 pt-16 pb-8">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12 pb-12 border-b border-paper/10">
+      <div class="col-span-2">
+        <a href="#" class="flex items-center gap-2.5 mb-4">
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <rect x="3" y="10" width="4" height="8" rx="1" fill="#F4F1EC"/>
+            <rect x="12" y="5" width="4" height="18" rx="1" fill="#E04E2B"/>
+            <rect x="21" y="12" width="4" height="4" rx="1" fill="#F4F1EC"/>
+          </svg>
+          <span class="font-display text-xl font-semibold tracking-tight text-paper">Cadence</span>
+        </a>
+        <p class="text-sm leading-relaxed max-w-xs">Meeting notes that actually get done. Built for teams that would rather ship than summarize.</p>
+        <div class="flex items-center gap-3 mt-5">
+          <a href="#" aria-label="X" class="w-9 h-9 rounded-full border border-paper/15 flex items-center justify-center hover:bg-paper/10 hover:border-paper/30 transition-colors"><i class="fa-brands fa-x-twitter text-sm"></i></a>
+          <a href="#" aria-label="LinkedIn" class="w-9 h-9 rounded-full border border-paper/15 flex items-center justify-center hover:bg-paper/10 hover:border-paper/30 transition-colors"><i class="fa-brands fa-linkedin-in text-sm"></i></a>
+          <a href="#" aria-label="GitHub" class="w-9 h-9 rounded-full border border-paper/15 flex items-center justify-center hover:bg-paper/10 hover:border-paper/30 transition-colors"><i class="fa-brands fa-github text-sm"></i></a>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-xs font-mono uppercase tracking-wider text-paper/40 mb-4">Product</div>
+        <ul class="space-y-3 text-sm">
+          <li><a href="#" class="hover:text-paper transition-colors">Features</a></li>
+          <li><a href="#" class="hover:text-paper transition-colors">Integrations</a></li>
+          <li><a href="#" class="hover:text-paper transition-colors">Pricing</a></li>
+          <li><a href="#" class="hover:text-paper transition-colors">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="text-xs font-mono uppercase tracking-wider text-paper/40 mb-4">Company</div>
+        <ul class="space-y-3 text-sm">
+          <li><a href="#" class="hover:text-paper transition-colors">About</a></li>
+          <li><a href="#" class="hover:text-paper transition-colors">Careers</a></li>
+          <li><a href="#" class="hover:text-paper transition-colors">Customers</a></li>
+          <li><a href="#" class="hover:text-paper transition-colors">Press</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="text-xs font-mono uppercase tracking-wider text-paper/40 mb-4">Resources</div>
+        <ul class="space-y-3 text-sm">
+          <li><a href="#" class="hover:text-paper transition-colors">Docs</a></li>
+          <li><a href="#" class="hover:text-paper transition-colors">Security</a></li>
+          <li><a href="#" class="hover:text-paper transition-colors">Status</a></li>
+          <li><a href="#" class="hover:text-paper transition-colors">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-paper/40">
+      <div>© 2025 Cadence Labs, Inc. Made with focus in Brooklyn & Lisbon.</div>
+      <div class="flex flex-wrap items-center gap-5">
+        <a href="#" class="hover:text-paper/70 transition-colors">Privacy</a>
+        <a href="#" class="hover:text-paper/70 transition-colors">Terms</a>
+        <a href="#" class="hover:text-paper/70 transition-colors">DPA</a>
+        <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-green-400"></span> All systems normal</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const nav = document.getElementById('nav');
+  const onScroll = () => {
+    if (window.scrollY > 20) nav.classList.add('nav-scrolled');
+    else nav.classList.remove('nav-scrolled');
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>

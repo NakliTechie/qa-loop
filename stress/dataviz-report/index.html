@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>State of Remote Work 2026 — The Distributed Review</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F2EDE3;
+    --paper-2: #FAF7F1;
+    --ink: #1A1714;
+    --ink-2: #4A4239;
+    --muted: #8A7F71;
+    --border: #D9D2C5;
+    --accent: #B0492A;
+    --accent-2: #2D5A4F;
+    --gold: #C9A876;
+  }
+  html, body { background: var(--paper); color: var(--ink); }
+  body { font-family: 'Inter', sans-serif; font-feature-settings: 'ss01', 'cv11'; }
+  .font-display { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  .text-ink { color: var(--ink); }
+  .text-ink-2 { color: var(--ink-2); }
+  .text-muted { color: var(--muted); }
+  .text-accent { color: var(--accent); }
+  .text-accent-2 { color: var(--accent-2); }
+  .bg-paper { background: var(--paper); }
+  .bg-paper-2 { background: var(--paper-2); }
+  .bg-ink { background: var(--ink); }
+  .border-default { border-color: var(--border); }
+  .border-ink { border-color: var(--ink); }
+
+  .dropcap::first-letter {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 4.8rem;
+    line-height: 0.82;
+    float: left;
+    margin: 0.35rem 0.7rem 0 0;
+    color: var(--accent);
+  }
+  .section-num { font-family: 'Fraunces', serif; font-style: italic; font-weight: 400; }
+  .chart-box { position: relative; height: 380px; width: 100%; }
+  .chart-box-sm { position: relative; height: 340px; width: 100%; }
+  .tnum { font-variant-numeric: tabular-nums; }
+  html { scroll-behavior: smooth; }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 18% 28%, rgba(176, 73, 42, 0.035) 0%, transparent 45%),
+      radial-gradient(circle at 82% 72%, rgba(45, 90, 79, 0.025) 0%, transparent 45%);
+    pointer-events: none; z-index: 0;
+  }
+  .stat-card { transition: transform 0.3s ease, border-color 0.3s ease; }
+  .stat-card:hover { transform: translateY(-2px); border-color: var(--ink); }
+  .nav-link { position: relative; }
+  .nav-link::after {
+    content: ''; position: absolute; left: 0; bottom: -4px;
+    width: 0; height: 1px; background: var(--accent); transition: width 0.3s ease;
+  }
+  .nav-link:hover::after { width: 100%; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--paper); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body class="relative">
+
+<!-- Utility bar -->
+<div class="bg-ink text-[#F2EDE3] text-xs relative z-10">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <span class="font-mono uppercase tracking-[0.15em]">The Distributed Review</span>
+      <span class="hidden md:inline opacity-60">Vol. 03 · Issue 01</span>
+    </div>
+    <div class="flex items-center gap-4 opacity-80">
+      <span class="hidden sm:inline font-mono">Q1 2026</span>
+      <span class="font-mono">14 January 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- Masthead -->
+<header class="relative z-10 max-w-7xl mx-auto px-6 pt-10 pb-6">
+  <div class="flex items-baseline justify-between border-b border-default pb-6">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-ink text-[#F2EDE3] flex items-center justify-center font-display font-semibold text-xl">R</div>
+      <div>
+        <div class="font-display text-xl font-semibold leading-none">The Distributed Review</div>
+        <div class="text-xs text-muted mt-1 font-mono uppercase tracking-[0.15em]">A quarterly report on work, distributed</div>
+      </div>
+    </div>
+    <nav class="hidden md:flex items-center gap-7 text-sm">
+      <a href="#trends" class="nav-link">Trends</a>
+      <a href="#productivity" class="nav-link">Productivity</a>
+      <a href="#satisfaction" class="nav-link">Satisfaction</a>
+      <a href="#geography" class="nav-link">Geography</a>
+      <a href="#methodology" class="nav-link">Methodology</a>
+    </nav>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="relative z-10 max-w-7xl mx-auto px-6 pb-16">
+  <div class="grid grid-cols-12 gap-8 items-end">
+    <div class="col-span-12 lg:col-span-7">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="text-xs font-mono uppercase tracking-[0.2em] text-accent">Annual Report</span>
+        <span class="h-px w-12 bg-accent"></span>
+        <span class="text-xs font-mono uppercase tracking-[0.2em] text-muted">No. 12</span>
+      </div>
+      <h1 class="font-display font-light leading-[0.92] tracking-tight" style="font-size: clamp(2.8rem, 7vw, 6.4rem);">
+        State of <em class="italic font-normal text-accent">Remote</em><br>Work, 2026.
+      </h1>
+      <p class="mt-8 text-lg md:text-xl text-ink-2 leading-relaxed max-w-2xl font-light">
+        Five years after the great dispersal, distributed work has stopped being a story about <em>where</em> people sit — and become a story about <em>how</em> organizations actually run. This year's data, drawn from 18,400 knowledge workers across 47 countries, finds a labor market that has quietly finished arguing with itself.
+      </p>
+    </div>
+    <div class="col-span-12 lg:col-span-5">
+      <figure class="relative">
+        <img src="https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=80"
+             alt="A sunlit home workspace with a laptop and notebook"
+             class="w-full h-[420px] object-cover" style="filter: grayscale(8%) contrast(1.02);">
+        <figcaption class="mt-3 text-xs text-muted font-mono">
+          FIG. 01 — A distributed team member's workspace in Lisbon, where 9% of remote knowledge workers now reside.
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- Key stats row -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-0 mt-16 border-t border-b border-ink">
+    <div class="p-6 border-r border-default">
+      <div class="text-xs font-mono uppercase tracking-wider text-muted mb-2">Fully remote share</div>
+      <div class="font-display text-5xl font-light tnum">28<span class="text-2xl text-muted">%</span></div>
+      <div class="text-xs text-ink-2 mt-2">↑ 4 pts vs. 2024</div>
+    </div>
+    <div class="p-6 border-r border-default">
+      <div class="text-xs font-mono uppercase tracking-wider text-muted mb-2">Median async hours</div>
+      <div class="font-display text-5xl font-light tnum">11.2<span class="text-2xl text-muted">h</span></div>
+      <div class="text-xs text-ink-2 mt-2">per week, ↑ 18%</div>
+    </div>
+    <div class="p-6 border-r border-default">
+      <div class="text-xs font-mono uppercase tracking-wider text-muted mb-2">Retention premium</div>
+      <div class="font-display text-5xl font-light tnum text-accent-2">2.3<span class="text-2xl text-muted">×</span></div>
+      <div class="text-xs text-ink-2 mt-2">remote vs. on-site</div>
+    </div>
+    <div class="p-6">
+      <div class="text-xs font-mono uppercase tracking-wider text-muted mb-2">Countries surveyed</div>
+      <div class="font-display text-5xl font-light tnum">47</div>
+      <div class="text-xs text-ink-2 mt-2">18,400 respondents</div>
+    </div>
+  </div>
+</section>
+
+<!-- Lede -->
+<section class="relative z-10 max-w-7xl mx-auto px-6 pb-20">
+  <div class="grid grid-cols-12 gap-8">
+    <div class="col-span-12 md:col-span-3">
+      <div class="sticky top-8">
+        <div class="text-xs font-mono uppercase tracking-[0.2em] text-muted mb-3">Filed by</div>
+        <div class="font-display text-lg">Mara Ellison</div>
+        <div class="text-sm text-muted">Senior Researcher, Workforce Studies</div>
+        <div class="mt-4 text-xs font-mono uppercase tracking-[0.2em] text-muted mb-3">With</div>
+        <div class="text-sm text-ink-2">Daniel Okonkwo, Priya Raman</div>
+        <div class="mt-6 pt-6 border-t border-default">
+          <div class="text-xs font-mono uppercase tracking-[0.2em] text-muted mb-2">Reading time</div>
+          <div class="text-sm">11 minutes</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-span-12 md:col-span-9">
+      <p class="dropcap font-display text-xl md:text-2xl leading-relaxed text-ink mb-6" style="font-weight: 400;">
+        The conversation about remote work is over. Not because anyone won the argument, but because the argument stopped being interesting. In 2026, distributed work is no longer a perk, a posture, or a pandemic hangover — it is, for roughly seventy percent of knowledge work, simply the way the work gets done.
+      </p>
+      <p class="text-base md:text-lg leading-relaxed text-ink-2 mb-5">
+        What's changed since our 2024 report is less the <em>amount</em> of remote work — that number has moved only four points in two years — and more the <em>quality</em> of it. Organizations have stopped running two parallel operating systems, one for the office and one for everywhere else. The async stack has matured. Compensation bands have been regionalized and then, in many cases, de-regionalized again. Managers have, on average, finally learned to write things down.
+      </p>
+      <p class="text-base md:text-lg leading-relaxed text-ink-2 mb-5">
+        The four charts that follow track the shape of this settled landscape: how work arrangements have distributed themselves across quarters, what has happened to measured productivity, where employees say they are thriving (and where they aren't), and the geography of where the world's remote workers actually sit.
+      </p>
+      <p class="text-base md:text-lg leading-relaxed text-ink-2">
+        Read together, they tell a story of stabilization rather than revolution. The most striking finding isn't in any single chart — it's that the variance between quarters has fallen to its lowest level since we began tracking. The remote-work question, in other words, has stopped being a question.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Chart 1: Stacked bar -->
+<section id="trends" class="relative z-10 bg-paper-2 border-t border-default">
+  <div class="max-w-7xl mx-auto px-6 py-20">
+    <div class="grid grid-cols-12 gap-8 mb-10">
+      <div class="col-span-12 md:col-span-4">
+        <div class="flex items-baseline gap-3 mb-4">
+          <span class="section-num text-3xl text-accent">§ 01</span>
+          <span class="text-xs font-mono uppercase tracking-[0.2em] text-muted">Work arrangement</span>
+        </div>
+        <h2 class="font-display text-4xl md:text-5xl font-light leading-tight mb-4">The hybrid majority holds firm.</h2>
+      </div>
+      <div class="col-span-12 md:col-span-8 md:pt-2">
+        <p class="text-lg text-ink-2 leading-relaxed">
+          Hybrid arrangements stabilized at 42% of knowledge work in 2025 and have not budged since. Fully remote work crept up four points over two years — modest, but the only category still climbing. On-site work, once the default, is now a plurality, not a majority.
+        </p>
+      </div>
+    </div>
+
+    <div class="bg-paper border border-default p-6 md:p-8">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-default flex-wrap gap-3">
+        <div>
+          <div class="text-xs font-mono uppercase tracking-wider text-muted">Figure 1.1</div>
+          <div class="font-display text-xl mt-1">Distribution of work arrangements by quarter</div>
+        </div>
+        <div class="flex items-center gap-4 text-xs">
+          <span class="flex items-center gap-2"><span class="w-3 h-3 inline-block" style="background:#6B6259"></span>On-site</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 inline-block" style="background:#C9A876"></span>Hybrid</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 inline-block" style="background:#B0492A"></span>Fully remote</span>
+        </div>
+      </div>
+      <div class="chart-box">
+        <canvas id="chart-stacked"></canvas>
+      </div>
+      <div class="mt-6 pt-4 border-t border-default text-xs text-muted font-mono">
+        Source: Distributed Review Workforce Survey · n = 18,400 · Q1 2024 – Q1 2026 · Margin of error ±1.3 pts
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      <div class="stat-card bg-paper border border-default p-5">
+        <div class="text-xs font-mono uppercase tracking-wider text-muted mb-2">On-site decline</div>
+        <div class="font-display text-3xl tnum">−8 pts</div>
+        <div class="text-sm text-ink-2 mt-2">Since Q1 2024, the largest two-year shift in any category.</div>
+      </div>
+      <div class="stat-card bg-paper border border-default p-5">
+        <div class="text-xs font-mono uppercase tracking-wider text-muted mb-2">Hybrid equilibrium</div>
+        <div class="font-display text-3xl tnum">42%</div>
+        <div class="text-sm text-ink-2 mt-2">Unchanged across four consecutive quarters — a stable plateau.</div>
+      </div>
+      <div class="stat-card bg-paper border border-default p-5">
+        <div class="text-xs font-mono uppercase tracking-wider text-muted mb-2">Remote growth</div>
+        <div class="font-display text-3xl tnum text-accent">+4 pts</div>
+        <div class="text-sm text-ink-2 mt-2">Concentrated in engineering, design, and writing roles.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Chart 2: Line -->
+<section id="productivity" class="relative z-10 border-t border-default">
+  <div class="max-w-7xl mx-auto px-6 py-20">
+    <div class="grid grid-cols-12 gap-8 mb-10">
+      <div class="col-span-12 md:col-span-4">
+        <div class="flex items-baseline gap-3 mb-4">
+          <span class="section-num text-3xl text-accent">§ 02</span>
+          <span class="text-xs font-mono uppercase tracking-[0.2em] text-muted">Productivity index</span>
+        </div>
+        <h2 class="font-display text-4xl md:text-5xl font-light leading-tight mb-4">The productivity gap stopped closing.</h2>
+      </div>
+      <div class="col-span-12 md:col-span-8 md:pt-2">
+        <p class="text-lg text-ink-2 leading-relaxed">
+          Self-reported productivity, indexed to January 2024, has risen across all arrangements — but the remote cohort has widened, not narrowed, its lead. The "productivity penalty" of working from home, much discussed in 2023, has not materialized in the data.
+        </p>
+      </div>
+    </div>
+
+    <div class="bg-paper-2 border border-default p-6 md:p-8">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-default flex-wrap gap-3">
+        <div>
+          <div class="text-xs font-mono uppercase tracking-wider text-muted">Figure 2.1</div>
+          <div class="font-display text-xl mt-1">Productivity index by work arrangement, Jan 2024 = 100</div>
+        </div>
+        <div class="flex items-center gap-4 text-xs">
+          <span class="flex items-center gap-2"><span class="w-3 h-3 inline-block rounded-full" style="background:#B0492A"></span>Fully remote</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 inline-block rounded-full" style="background:#2D5A4F"></span>Hybrid</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 inline-block rounded-full" style="background:#6B6259"></span>On-site</span>
+        </div>
+      </div>
+      <div class="chart-box">
+        <canvas id="chart-line"></canvas>
+      </div>
+      <div class="mt-6 pt-4 border-t border-default text-xs text-muted font-mono">
+        Source: DR Productivity Panel · monthly self-assessment (60%) + manager review (40%) · n = 4,200 tracked quarterly
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Chart 3: Radar -->
+<section id="satisfaction" class="relative z-10 bg-paper-2 border-t border-default">
+  <div class="max-w-7xl mx-auto px-6 py-20">
+    <div class="grid grid-cols-12 gap-8 mb-10">
+      <div class="col-span-12 md:col-span-4">
+        <div class="flex items-baseline gap-3 mb-4">
+          <span class="section-num text-3xl text-accent">§ 03</span>
+          <span class="text-xs font-mono uppercase tracking-[0.2em] text-muted">Satisfaction dimensions</span>
+        </div>
+        <h2 class="font-display text-4xl md:text-5xl font-light leading-tight mb-4">Different work, different winners.</h2>
+      </div>
+      <div class="col-span-12 md:col-span-8 md:pt-2">
+        <p class="text-lg text-ink-2 leading-relaxed">
+          When employees rate six dimensions of work life, no arrangement wins on everything. Remote workers dominate focus and autonomy; on-site workers lead on collaboration and career growth. Hybrid, the compromise, finishes second on five of six — which is, perhaps, why it remains the plurality.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-12 gap-8">
+      <div class="col-span-12 lg:col-span-8">
+        <div class="bg-paper border border-default p-6 md:p-8">
+          <div class="mb-6 pb-4 border-b border-default">
+            <div class="text-xs font-mono uppercase tracking-wider text-muted">Figure 3.1</div>
+            <div class="font-display text-xl mt-1">Employee satisfaction across six dimensions (1–10)</div>
+          </div>
+          <div class="chart-box">
+            <canvas id="chart-radar"></canvas>
+          </div>
+          <div class="mt-6 pt-4 border-t border-default text-xs text-muted font-mono">
+            Source: DR Satisfaction Survey · Q4 2025 · n = 9,800 · scored on a 10-point scale
+          </div>
+        </div>
+      </div>
+      <div class="col-span-12 lg:col-span-4 space-y-4">
+        <div class="bg-paper border border-default p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-3 h-3 inline-block rounded-full" style="background:#B0492A"></span>
+            <span class="text-xs font-mono uppercase tracking-wider">Fully remote</span>
+          </div>
+          <div class="text-sm text-ink-2">Wins on focus time (8.9), autonomy (8.4), and work-life balance (8.7). Loses badly on collaboration (6.1).</div>
+        </div>
+        <div class="bg-paper border border-default p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-3 h-3 inline-block rounded-full" style="background:#2D5A4F"></span>
+            <span class="text-xs font-mono uppercase tracking-wider">Hybrid</span>
+          </div>
+          <div class="text-sm text-ink-2">The all-rounder: never first, never last. Highest overall average (7.4) when dimensions are equally weighted.</div>
+        </div>
+        <div class="bg-paper border border-default p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-3 h-3 inline-block rounded-full" style="background:#6B6259"></span>
+            <span class="text-xs font-mono uppercase tracking-wider">On-site</span>
+          </div>
+          <div class="text-sm text-ink-2">Wins collaboration (8.6) and career growth (8.3) — the two dimensions most tied to physical presence.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Chart 4: Pie -->
+<section id="geography" class="relative z-10 border-t border-default">
+  <div class="max-w-7xl mx-auto px-6 py-20">
+    <div class="grid grid-cols-12 gap-8 mb-10">
+      <div class="col-span-12 md:col-span-4">
+        <div class="flex items-baseline gap-3 mb-4">
+          <span class="section-num text-3xl text-accent">§ 04</span>
+          <span class="text-xs font-mono uppercase tracking-[0.2em] text-muted">Geographic distribution</span>
+        </div>
+        <h2 class="font-display text-4xl md:text-5xl font-light leading-tight mb-4">Where the remote workers are.</h2>
+      </div>
+      <div class="col-span-12 md:col-span-8 md:pt-2">
+        <p class="text-lg text-ink-2 leading-relaxed">
+          North America still hosts the largest share of the world's remote knowledge workforce, but its lead is shrinking. The most consequential shift since 2024 is the rise of South Asia and Latin America — together now home to nearly a quarter of remote workers, up from 17% two years ago.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-12 gap-8 items-center">
+      <div class="col-span-12 lg:col-span-6">
+        <div class="bg-paper-2 border border-default p-6 md:p-8">
+          <div class="mb-6 pb-4 border-b border-default">
+            <div class="text-xs font-mono uppercase tracking-wider text-muted">Figure 4.1</div>
+            <div class="font-display text-xl mt-1">Remote knowledge workers by region, 2026</div>
+          </div>
+          <div class="chart-box-sm">
+            <canvas id="chart-pie"></canvas>
+          </div>
+          <div class="mt-6 pt-4 border-t border-default text-xs text-muted font-mono">
+            Source: DR Global Distribution Index · respondents working remotely ≥ 3 days/week
+          </div>
+        </div>
+      </div>
+      <div class="col-span-12 lg:col-span-6">
+        <div class="space-y-1">
+          <div class="flex items-center justify-between py-3 border-b border-default">
+            <div class="flex items-center gap-3">
+              <span class="w-4 h-4 inline-block" style="background:#B0492A"></span>
+              <span class="font-display text-lg">North America</span>
+            </div>
+            <div class="text-right">
+              <div class="font-display text-2xl tnum">34%</div>
+              <div class="text-xs text-muted">↓ 5 pts vs. 2024</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-3 border-b border-default">
+            <div class="flex items-center gap-3">
+              <span class="w-4 h-4 inline-block" style="background:#2D5A4F"></span>
+              <span class="font-display text-lg">Western Europe</span>
+            </div>
+            <div class="text-right">
+              <div class="font-display text-2xl tnum">26%</div>
+              <div class="text-xs text-muted">↓ 2 pts</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-3 border-b border-default">
+            <div class="flex items-center gap-3">
+              <span class="w-4 h-4 inline-block" style="background:#C9A876"></span>
+              <span class="font-display text-lg">South Asia</span>
+            </div>
+            <div class="text-right">
+              <div class="font-display text-2xl tnum">14%</div>
+              <div class="text-xs text-accent-2">↑ 4 pts</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-3 border-b border-default">
+            <div class="flex items-center gap-3">
+              <span class="w-4 h-4 inline-block" style="background:#6B6259"></span>
+              <span class="font-display text-lg">East Asia</span>
+            </div>
+            <div class="text-right">
+              <div class="font-display text-2xl tnum">11%</div>
+              <div class="text-xs text-muted">flat</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-3 border-b border-default">
+            <div class="flex items-center gap-3">
+              <span class="w-4 h-4 inline-block" style="background:#8A7F71"></span>
+              <span class="font-display text-lg">Latin America</span>
+            </div>
+            <div class="text-right">
+              <div class="font-display text-2xl tnum">8%</div>
+              <div class="text-xs text-accent-2">↑ 3 pts</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-3">
+            <div class="flex items-center gap-3">
+              <span class="w-4 h-4 inline-block" style="background:#D9D2C5"></span>
+              <span class="font-display text-lg">Other</span>
+            </div>
+            <div class="text-right">
+              <div class="font-display text-2xl tnum">7%</div>
+              <div class="text-xs text-muted">flat</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Methodology / footer -->
+<section id="methodology" class="relative z-10 bg-ink text-[#F2EDE3] border-t border-ink">
+  <div class="max-w-7xl mx-auto px-6 py-20">
+    <div class="grid grid-cols-12 gap-8">
+      <div class="col-span-12 md:col-span-4">
+        <div class="text-xs font-mono uppercase tracking-[0.2em] text-[#F2EDE3]/50 mb-3">Methodology</div>
+        <h2 class="font-display text-3xl md:text-4xl font-light leading-tight">How we read the room.</h2>
+      </div>
+      <div class="col-span-12 md:col-span-8 text-[#F2EDE3]/80 leading-relaxed space-y-4">
+        <p>The Distributed Review Workforce Survey is conducted quarterly across a rotating panel of 18,400 knowledge workers in 47 countries. Respondents are recruited through a stratified sample weighted by role, seniority, and region. The productivity index combines monthly self-assessment (60% weight) with manager-reviewed output metrics (40% weight), indexed to a January 2024 baseline of 100.</p>
+        <p>Satisfaction dimensions are scored on a 1–10 scale across six categories: work-life balance, autonomy, collaboration, career growth, focus time, and wellbeing. The geographic distribution figure reflects the primary residence of respondents who report working remotely at least three days per week.</p>
+        <p>The full dataset and questionnaires are available to subscribers. Margin of error for the headline figures is ±1.3 percentage points at the 95% confidence level.</p>
+      </div>
+    </div>
+
+    <div class="mt-16 pt-8 border-t border-[#F2EDE3]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div>
+        <div class="font-display text-2xl">The Distributed Review</div>
+        <div class="text-[#F2EDE3]/60 text-sm mt-1">© 2026 · A quarterly report on work, distributed.</div>
+      </div>
+      <div class="flex items-center gap-5 text-[#F2EDE3]/70">
+        <a href="#" aria-label="X" class="hover:text-[#F2EDE3] transition"><i class="fa-brands fa-x-twitter text-lg"></i></a>
+        <a href="#" aria-label="LinkedIn" class="hover:text-[#F2EDE3] transition"><i class="fa-brands fa-linkedin text-lg"></i></a>
+        <a href="#" aria-label="RSS" class="hover:text-[#F2EDE3] transition"><i class="fa-solid fa-rss text-lg"></i></a>
+        <a href="#" aria-label="Email" class="hover:text-[#F2EDE3] transition"><i class="fa-solid fa-envelope text-lg"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Chart.js global defaults
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.color = '#4A4239';
+  Chart.defaults.borderColor = '#D9D2C5';
+  Chart.defaults.font.size = 12;
+
+  const palette = {
+    accent: '#B0492A',
+    accent2: '#2D5A4F',
+    gold: '#C9A876',
+    muted: '#6B6259',
+    light: '#D9D2C5',
+    ink: '#1A1714',
+    paper: '#FAF7F1'
+  };
+
+  // ---- Chart 1: Stacked bar ----
+  new Chart(document.getElementById('chart-stacked'), {
+    type: 'bar',
+    data: {
+      labels: ["Q1 '24", "Q2 '24", "Q3 '24", "Q4 '24", "Q1 '25", "Q2 '25", "Q3 '25", "Q4 '25", "Q1 '26"],
+      datasets: [
+        { label: 'On-site', data: [38, 37, 35, 34, 33, 32, 31, 31, 30], backgroundColor: palette.muted, borderWidth: 0 },
+        { label: 'Hybrid',  data: [38, 39, 40, 40, 41, 41, 42, 42, 42], backgroundColor: palette.gold, borderWidth: 0 },
+        { label: 'Fully remote', data: [24, 24, 25, 26, 26, 27, 27, 27, 28], backgroundColor: palette.accent, borderWidth: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: palette.ink, padding: 12, cornerRadius: 0,
+          titleFont: { weight: '600' },
+          callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}%` }
+        }
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { color: palette.muted, font: { size: 11 } }, border: { color: palette.ink } },
+        y: { stacked: true, beginAtZero: true, max: 100,
+          grid: { color: palette.light, drawTicks: false },
+          ticks: { color: palette.muted, font: { size: 11 }, callback: (v) => v + '%', stepSize: 25 },
+          border: { display: false } }
+      }
+    }
+  });
+
+  // ---- Chart 2: Line ----
+  new Chart(document.getElementById('chart-line'), {
+    type: 'line',
+    data: {
+      labels: ["Jan '24", "Apr '24", "Jul '24", "Oct '24", "Jan '25", "Apr '25", "Jul '25", "Oct '25", "Jan '26"],
+      datasets: [
+        { label: 'Fully remote', data: [102, 104, 105, 107, 108, 109, 111, 112, 113],
+          borderColor: palette.accent, backgroundColor: 'rgba(176,73,42,0.06)',
+          borderWidth: 2.5, tension: 0.35, pointRadius: 4,
+          pointBackgroundColor: palette.accent, pointBorderColor: palette.paper, pointBorderWidth: 2,
+          pointHoverRadius: 6, fill: false },
+        { label: 'Hybrid', data: [100, 101, 102, 103, 104, 105, 106, 107, 108],
+          borderColor: palette.accent2, backgroundColor: 'rgba(45,90,79,0.06)',
+          borderWidth: 2.5, tension: 0.35, pointRadius: 4,
+          pointBackgroundColor: palette.accent2, pointBorderColor: palette.paper, pointBorderWidth: 2,
+          pointHoverRadius: 6, fill: false },
+        { label: 'On-site', data: [98, 99, 100, 99, 100, 101, 100, 101, 102],
+          borderColor: palette.muted, backgroundColor: 'rgba(107,98,89,0.06)',
+          borderWidth: 2.5, borderDash: [5, 4], tension: 0.35, pointRadius: 4,
+          pointBackgroundColor: palette.muted, pointBorderColor: palette.paper, pointBorderWidth: 2,
+          pointHoverRadius: 6, fill: false }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: palette.ink, padding: 12, cornerRadius: 0,
+          callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}` } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: palette.muted, font: { size: 11 } }, border: { color: palette.ink } },
+        y: { beginAtZero: false, min: 95, max: 116,
+          grid: { color: palette.light, drawTicks: false },
+          ticks: { color: palette.muted, font: { size: 11 }, stepSize: 5 },
+          border: { display: false } }
+      }
+    }
+  });
+
+  // ---- Chart 3: Radar ----
+  new Chart(document.getElementById('chart-radar'), {
+    type: 'radar',
+    data: {
+      labels: ['Work-life balance', 'Autonomy', 'Collaboration', 'Career growth', 'Focus time', 'Wellbeing'],
+      datasets: [
+        { label: 'Fully remote', data: [8.7, 8.4, 6.1, 6.3, 8.9, 8.2],
+          borderColor: palette.accent, backgroundColor: 'rgba(176,73,42,0.18)',
+          borderWidth: 2, pointBackgroundColor: palette.accent, pointBorderColor: palette.paper,
+          pointRadius: 4, pointHoverRadius: 6 },
+        { label: 'Hybrid', data: [7.6, 7.2, 7.8, 7.4, 7.5, 7.7],
+          borderColor: palette.accent2, backgroundColor: 'rgba(45,90,79,0.15)',
+          borderWidth: 2, pointBackgroundColor: palette.accent2, pointBorderColor: palette.paper,
+          pointRadius: 4, pointHoverRadius: 6 },
+        { label: 'On-site', data: [6.2, 5.8, 8.6, 8.3, 5.9, 6.5],
+          borderColor: palette.muted, backgroundColor: 'rgba(107,98,89,0.12)',
+          borderWidth: 2, pointBackgroundColor: palette.muted, pointBorderColor: palette.paper,
+          pointRadius: 4, pointHoverRadius: 6 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: palette.ink, padding: 12, cornerRadius: 0 }
+      },
+      scales: {
+        r: {
+          beginAtZero: true, min: 0, max: 10,
+          ticks: { color: palette.muted, font: { size: 10 }, backdropColor: 'transparent', stepSize: 2 },
+          grid: { color: palette.light },
+          angleLines: { color: palette.light },
+          pointLabels: { color: palette.ink, font: { size: 12, family: "'Fraunces', serif", weight: '500' } }
+        }
+      }
+    }
+  });
+
+  // ---- Chart 4: Doughnut ----
+  new Chart(document.getElementById('chart-pie'), {
+    type: 'doughnut',
+    data: {
+      labels: ['North America', 'Western Europe', 'South Asia', 'East Asia', 'Latin America', 'Other'],
+      datasets: [{
+        data: [34, 26, 14, 11, 8, 7],
+        backgroundColor: [palette.accent, palette.accent2, palette.gold, palette.muted, '#8A7F71', palette.light],
+        borderColor: palette.paper,
+        borderWidth: 3,
+        hoverOffset: 14
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '58%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: palette.ink, padding: 12, cornerRadius: 0,
+          callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed}%` } }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
