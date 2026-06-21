@@ -34,6 +34,12 @@
   .btn{display:inline-block;font-family:ui-sans-serif,system-ui,sans-serif;font-weight:700;font-size:15px;
     background:var(--terra);color:#fff;border-radius:10px;padding:11px 18px;text-decoration:none;margin:6px 10px 6px 0}
   .btn.ghost{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
+  .examples{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px;margin:18px 0}
+  .ex{display:block;text-decoration:none;border:1px solid var(--line);border-left-width:4px;border-radius:10px;padding:11px 14px;background:var(--card);color:var(--ink);font-family:ui-sans-serif,system-ui,sans-serif;transition:transform .08s ease,box-shadow .08s ease}
+  .ex:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(15,61,62,.10)}
+  .ex.pass{border-left-color:var(--good)} .ex.fail{border-left-color:var(--bad)}
+  .ex .v{font-weight:800;font-size:12px;letter-spacing:.03em} .ex.pass .v{color:var(--good)} .ex.fail .v{color:var(--bad)}
+  .ex b{display:block;font-size:15px;color:var(--teal);margin:3px 0 1px} .ex small{color:var(--muted);font-size:12.5px}
   figure{margin:22px 0}
   figure img{width:100%;border:1px solid var(--line);border-radius:10px;display:block;background:#fff}
   figcaption{font-family:ui-sans-serif,system-ui,sans-serif;font-size:13.5px;color:var(--muted);margin-top:8px}
@@ -87,6 +93,20 @@
     <a class="btn" href="outputs/tidepool.html">▶ Open the generated page (live)</a>
     <a class="btn ghost" href="https://github.com/NakliTechie/qa-loop">★ View the repo on GitHub</a>
   </p>
+
+  <h2 id="examples" style="border-top:none;margin-top:1.4em">Examples — open them live</h2>
+  <p>Seven prompts run through the loop on the open <b>GLM-5.2 + GLM-4.6V</b> stack. Five converged on the
+  first round at a clean 5/5; the two interactive/3D ones are where it broke down — the critic kept failing
+  them, correctly. Click any to open the real generated page:</p>
+  <div class="examples">
+    <a class="ex pass" href="stress/landing-saas/"><span class="v">✓ PASS</span><b>SaaS landing page</b><small>"Cadence" · 1 round · $0.10</small></a>
+    <a class="ex pass" href="stress/dashboard-multichart/"><span class="v">✓ PASS</span><b>Analytics dashboard</b><small>4 Chart.js charts · 1 round · $0.09</small></a>
+    <a class="ex pass" href="stress/dataviz-report/"><span class="v">✓ PASS</span><b>Data report</b><small>stacked / line / radar / pie · 1 round · $0.10</small></a>
+    <a class="ex pass" href="stress/portfolio-gallery/"><span class="v">✓ PASS</span><b>Photo portfolio</b><small>masonry gallery · 1 round · $0.11</small></a>
+    <a class="ex pass" href="stress/pricing-toggle/"><span class="v">✓ PASS</span><b>Pricing page</b><small>billing toggle + FAQ · 1 round · $0.07</small></a>
+    <a class="ex fail" href="stress/threejs-product/"><span class="v">✗ FAIL</span><b>three.js 3D product</b><small>4 rounds · widgets 2 — never drew</small></a>
+    <a class="ex fail" href="stress/game-breakout/"><span class="v">✗ FAIL</span><b>Breakout game (canvas)</b><small>4 rounds · widgets 2 — never drew</small></a>
+  </div>
 
   <h2>The idea</h2>
   <p>The Design Arena teardown found something counterintuitive: <b>GLM-5.2 — a 744B, text-only,
