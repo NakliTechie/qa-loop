@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text-only Coder + Multimodal QA — a generate→render→critique→repair loop</title>
+<meta name="description" content="Pairing a text-only coding model (GLM-5.2) with an open vision critic (GLM-4.6V) in a screenshot-driven QA loop. A project report — including the bug that turned out to be in the harness, not the model.">
+<style>
+  :root{
+    --bg:#f5efe2; --ink:#1d2b2b; --muted:#5b6b67; --line:#e0d7c5;
+    --teal:#0f3d3e; --terra:#c2613f; --card:#fffdf8; --code:#13201f;
+    --good:#2f7d5b; --bad:#b1492f;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:17px/1.65 ui-serif,Georgia,"Times New Roman",serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 22px}
+  h1,h2,h3{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.2;color:var(--teal)}
+  h1{font-size:clamp(28px,5vw,44px);letter-spacing:-.02em;margin:.2em 0 .1em}
+  h2{font-size:clamp(22px,3.4vw,30px);letter-spacing:-.01em;margin:2.4em 0 .5em;padding-top:.3em;border-top:1px solid var(--line)}
+  h3{font-size:18px;margin:1.6em 0 .3em}
+  a{color:var(--terra);text-decoration-thickness:1px;text-underline-offset:2px}
+  code,kbd{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86em;background:#ede4d2;padding:.08em .35em;border-radius:4px}
+  header.hero{padding:54px 0 8px}
+  .kicker{font-family:ui-sans-serif,system-ui,sans-serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--terra);font-weight:700;margin:0}
+  .lede{font-size:clamp(18px,2.4vw,21px);color:var(--muted);max-width:46ch}
+  .meta{font-family:ui-sans-serif,system-ui,sans-serif;font-size:13px;color:var(--muted);margin-top:18px}
+  .meta b{color:var(--ink)}
+  .result{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:var(--teal);color:#f3ece0;border-radius:14px;padding:22px 24px;margin:26px 0}
+  .result .badge{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:800;font-size:14px;letter-spacing:.08em;text-transform:uppercase;background:var(--terra);color:#fff;border-radius:999px;padding:6px 14px}
+  .result .scores{font-family:ui-monospace,monospace;font-size:14px;color:#cfe3da}
+  .result strong{color:#fff}
+  .btn{display:inline-block;font-family:ui-sans-serif,system-ui,sans-serif;font-weight:700;font-size:15px;
+    background:var(--terra);color:#fff;border-radius:10px;padding:11px 18px;text-decoration:none;margin:6px 10px 6px 0}
+  .btn.ghost{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
+  figure{margin:22px 0}
+  figure img{width:100%;border:1px solid var(--line);border-radius:10px;display:block;background:#fff}
+  figcaption{font-family:ui-sans-serif,system-ui,sans-serif;font-size:13.5px;color:var(--muted);margin-top:8px}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .cmp .tag{font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;padding:3px 9px;display:inline-block;margin-bottom:8px}
+  .tag.bad{background:#f3d9cf;color:var(--bad)} .tag.good{background:#d4ebdd;color:var(--good)}
+  @media(max-width:620px){.cmp{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-family:ui-sans-serif,system-ui,sans-serif;font-size:14.5px;margin:14px 0}
+  th,td{text-align:left;vertical-align:top;padding:10px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--teal);font-size:12.5px;letter-spacing:.04em;text-transform:uppercase}
+  td.run{font-weight:700;white-space:nowrap}
+  .pass{color:var(--good);font-weight:700}.fail{color:var(--bad);font-weight:700}
+  pre{background:var(--code);color:#e6e1d6;border-radius:12px;padding:18px 20px;overflow:auto;font-size:13.5px;line-height:1.55}
+  pre code{background:none;padding:0;color:inherit}
+  .steps{list-style:none;padding:0;counter-reset:s}
+  .steps li{position:relative;padding:6px 0 6px 44px;font-family:ui-sans-serif,system-ui,sans-serif}
+  .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:6px;width:28px;height:28px;
+    background:var(--terra);color:#fff;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px}
+  ul.clean{padding-left:1.1em}
+  ul.clean li{margin:.3em 0}
+  blockquote{margin:18px 0;padding:12px 18px;border-left:3px solid var(--terra);background:var(--card);color:var(--ink);font-style:italic}
+  footer{margin:48px 0 70px;padding-top:18px;border-top:1px solid var(--line);font-family:ui-sans-serif,system-ui,sans-serif;font-size:13.5px;color:var(--muted)}
+  .pill{font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;background:#eee4d2;border:1px solid var(--line);border-radius:999px;padding:3px 10px;margin:0 4px 4px 0;display:inline-block}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <p class="kicker">Project report · June 2026</p>
+  <h1>The cheapest place to buy<br>“does it look right?”</h1>
+  <p class="lede">Pairing a <b>text-only coding model</b> with a <b>multimodal vision critic</b> in a
+  generate → render → screenshot → critique → repair loop — and the bug that turned out to be in the
+  harness, not the model.</p>
+  <p class="meta">
+    Stack: <b>GLM-5.2</b> (coder, text-only, MIT) + <b>GLM-4.6V</b> (vision critic) · fully open weights ·
+    routed via OpenRouter / TokenRouter. Built off the
+    <a href="https://x.com/i/article/2067849694232080384">Design Arena GLM-5.2 teardown</a>.
+  </p>
+</div></header>
+
+<main class="wrap">
+
+  <div class="result">
+    <span class="badge">✓ Converged</span>
+    <div>
+      <div><strong>Round 1, perfect score.</strong> 46,098 chars in 206s.</div>
+      <div class="scores">renders 5 · styled 5 · layout 5 · images 5 · widgets 5 · taste 5 · fidelity 5 — 0 defects</div>
+    </div>
+  </div>
+  <p>
+    <a class="btn" href="outputs/tidepool.html">▶ Open the generated page (live)</a>
+    <a class="btn ghost" href="build-with-qa.ts">View the harness (≈200 lines)</a>
+  </p>
+
+  <h2>The idea</h2>
+  <p>The Design Arena teardown found something counterintuitive: <b>GLM-5.2 — a 744B, text-only,
+  MIT-licensed model with no vision at all — tops a <i>visual</i> web-design benchmark</b>, beating
+  far pricier frontier models. If a blind model is the best designer, then the generator half of
+  “make a good web page” is solved and cheap. What it can’t do is <i>see</i> its own output: whether the
+  flexbox collapsed, the image 404’d, or the chart actually drew.</p>
+  <p>So split the job across two senses:</p>
+  <ul class="clean">
+    <li>A <b>text-only coder</b> writes the HTML/CSS/JS. (Cheap, fast, state-of-the-art.)</li>
+    <li>A <b>vision critic</b> looks at a screenshot of the rendered page and grades it against a checklist.</li>
+    <li>Each failed check becomes a concrete fix fed back to the coder. Loop until it passes.</li>
+  </ul>
+  <p>Everything here runs on <b>open weights</b> — an all-GLM stack (GLM-5.2 + GLM-4.6V) keeps the whole
+  loop open and permissively licensed.</p>
+
+  <h2>The result</h2>
+  <p>With the coder, the critic, <i>and the capture between them</i> all correct, the loop converged on the
+  <b>first round</b> with a clean sweep from the critic. The page below is exactly what GLM-5.2 produced —
+  hero, a three-tier pricing table, a testimonials row, real CDN imagery, and a working Chart.js bar chart
+  for the blend’s flavor profile:</p>
+  <figure>
+    <a href="outputs/tidepool.html"><img src="assets/after-fix.jpg" alt="The final generated Tidepool landing page, fully rendered"></a>
+    <figcaption>The passing page (<a href="outputs/tidepool.html">open it live</a>). Critic verdict:
+    <code>5,5,5,5,5,5,5 — pass</code>.</figcaption>
+  </figure>
+
+  <h2>The twist: the model was fine — the harness lied</h2>
+  <p>For three runs the loop looked stuck: the critic kept reporting the pricing, testimonials, and chart
+  as <i>“not visible on the page.”</i> But inspecting the HTML showed those sections were <b>there the whole
+  time</b> — GLM-5.2 had built scroll-reveal sections (<code>opacity:0</code> + <code>IntersectionObserver</code>,
+  the “animated, elaborate” style the benchmark describes). The full-page screenshot <b>never scrolled</b>,
+  so it captured those sections at <code>opacity:0</code> — blank. The critic was honestly reporting blank
+  pixels. <b>The critic was right; the screenshot was the bug.</b></p>
+
+  <p>Here is the exact same final page, screenshotted two ways:</p>
+  <div class="cmp">
+    <figure>
+      <span class="tag bad">Before — naive capture</span>
+      <img src="assets/before-fix.jpg" alt="Same page captured without scrolling: hero shows, the rest is blank colored blocks">
+      <figcaption>No scroll. Hero renders; the collection, chart, pricing, and testimonials are blank blocks at <code>opacity:0</code> → the critic reports them “missing.”</figcaption>
+    </figure>
+    <figure>
+      <span class="tag good">After — reveal then capture</span>
+      <img src="assets/after-fix.jpg" alt="Same page captured after scrolling and forcing reveal: all sections visible">
+      <figcaption>Scroll to trip the observers, force <code>opacity:1</code>, nudge a resize so Chart.js redraws. Now the critic sees what was built.</figcaption>
+    </figure>
+  </div>
+  <p>No amount of prompting or patching the model fixes a false negative caused by the capture. <b>A
+  text-coder + vision-QA loop has three components that must be correct, not two: the coder, the critic,
+  and the render/capture between them.</b></p>
+
+  <h2>How it got there — five runs</h2>
+  <table>
+    <thead><tr><th>Run</th><th>Config</th><th>Outcome</th><th>What it taught</th></tr></thead>
+    <tbody>
+      <tr><td class="run">1</td>
+        <td>OpenRouter free · GLM-5.2 (6.5K tok) + Qwen3-VL-235B · regenerate</td>
+        <td class="fail">3 rounds, no pass</td>
+        <td>The critic correctly caught an unrendered Chart.js canvas and broken images → <b>the vision-QA half works.</b> <a href="logs/run1-openrouter-free.log">log</a></td></tr>
+      <tr><td class="run">2</td>
+        <td>TokenRouter · GLM-5.2 + GLM-4.6V (16K) · regenerate-from-scratch</td>
+        <td class="fail">3 rounds, no pass</td>
+        <td>Budget helped but sections thrashed in and out; round 1 blanked (reasoning ate the token budget). <b>Budget is necessary, not sufficient.</b> <a href="logs/run2-tokenrouter-regenerate.log">log</a></td></tr>
+      <tr><td class="run">3</td>
+        <td>+ patch-mode (feed prior HTML back), 28K tok</td>
+        <td class="fail">4 rounds, no pass</td>
+        <td>The “missing” sections were in the HTML all along — a <b>screenshot false-negative</b>, not a repair failure. <a href="logs/run3-patch-mode.log">log</a></td></tr>
+      <tr><td class="run">4</td>
+        <td>+ fixed render harness (reveal scroll content)</td>
+        <td class="fail">fetch failed @ ~300s</td>
+        <td>GLM-5.2’s ~300s generation tripped the gateway’s idle timeout. <b>Long generations need streaming.</b> <a href="logs/run4-gateway-timeout.log">log</a></td></tr>
+      <tr><td class="run">5</td>
+        <td>+ SSE streaming client</td>
+        <td class="pass">✓ pass, round 1</td>
+        <td>Coder + critic + capture all correct → converges immediately, 46,098 chars (the benchmark’s 46–57K sweet spot). <a href="logs/run5-streaming-pass.log">log</a></td></tr>
+    </tbody>
+  </table>
+
+  <h2>The QA checklist</h2>
+  <p>The critic grades the screenshot on the failure modes a text coder is blind to — derived from the
+  error cases behind the benchmark results:</p>
+  <ul class="clean">
+    <li><b>renders</b> — not a blank screen or fatal JS error</li>
+    <li><b>styled</b> — real CSS applied, not raw HTML</li>
+    <li><b>layout</b> — no overflow, overlap, or collapsed containers</li>
+    <li><b>images</b> — CDN images actually resolved (no broken-image icons)</li>
+    <li><b>widgets</b> — Chart.js / Three.js actually <i>drew</i>, not just reserved a blank canvas</li>
+    <li><b>taste</b> — none of the generic AI tells (purple gradients, cookie-cutter hero)</li>
+    <li><b>fidelity</b> — it matches what was asked for</li>
+  </ul>
+
+  <h2>The loop</h2>
+  <ol class="steps">
+    <li><b>Generate</b> — the text coder writes a complete HTML file (from scratch on round 1).</li>
+    <li><b>Render &amp; reveal</b> — headless Chromium loads it, scrolls to trip reveal animations, forces hidden content visible, nudges responsive charts to redraw.</li>
+    <li><b>Screenshot</b> — a full-page capture of what a human would actually see.</li>
+    <li><b>Critique</b> — the vision model returns strict JSON: per-axis scores + a list of defects, each with a concrete <code>fix_instruction</code>.</li>
+    <li><b>Patch</b> — on failure, the prior HTML is fed back with the fixes; the coder edits in place, preserving what works. Repeat until pass.</li>
+  </ol>
+
+  <h2>Run it yourself</h2>
+  <p>The whole harness is one ~200-line file: <a href="build-with-qa.ts">build-with-qa.ts</a>. It’s
+  provider-agnostic (OpenAI-compatible) — point it at OpenRouter, TokenRouter, or a self-hosted
+  vLLM/SGLang endpoint to run entirely on your own GPUs.</p>
+  <pre><code>npm install &amp;&amp; npx playwright install chromium
+
+# set CODER_MODEL / QA_MODEL / *_URL / OPENAI_API_KEY in a .env, then:
+node --import tsx/esm --env-file=.env build-with-qa.ts \
+  "a landing page for a specialty coffee subscription"</code></pre>
+  <p>
+    <span class="pill">coder · z-ai/glm-5.2</span>
+    <span class="pill">critic · z-ai/glm-4.6v</span>
+    <span class="pill">render · Playwright + Chromium</span>
+    <span class="pill">all open weights</span>
+  </p>
+
+  <footer>
+    <p><b>The takeaway above all others:</b> before blaming the generator or the loop, verify the harness —
+    <i>is the critic actually seeing what the generator built?</i> Half of “the model failed” turned out to be
+    “the screenshot lied.”</p>
+    <p>Source &amp; harness: <a href="https://github.com/NakliTechie/qa-loop">github.com/NakliTechie/qa-loop</a> ·
+    Built on the <a href="https://x.com/i/article/2067849694232080384">Design Arena GLM-5.2 teardown</a> by Anmay Gupta /
+    <a href="https://twitter.com/Intelligence_ai">@Intelligence_ai</a>.</p>
+    <p>A reproducibility demo; the “Tidepool” brand and copy are model-generated placeholders.</p>
+  </footer>
+
+</main>
+</body>
+</html>

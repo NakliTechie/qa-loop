@@ -1,0 +1,12 @@
+node_modules/
+
+# secrets — never commit
+.env
+.env.*
+
+# scratch run artifacts at repo root (curated copies live in outputs/ assets/ logs/)
+/out.html
+/round-*.png
+/round-*.html
+/report-*.json
+/run*.log

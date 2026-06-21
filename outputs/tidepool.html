@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tidepool — Specialty Coffee, Roasted Weekly on the Oregon Coast</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --cream:#F4ECDD; --cream-2:#EDE2CC; --ink:#1A1410; --espresso:#2A1E16;
+    --petrol:#0E3B43; --petrol-2:#134E5E; --teal:#1B6B73;
+    --amber:#C8704A; --amber-2:#E08D5C; --sand:#D9C9A8; --moss:#3E5C44;
+  }
+  *{-webkit-font-smoothing:antialiased;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);}
+  .font-display{font-family:'Fraunces',serif;font-optical-sizing:auto;}
+  .text-ink{color:var(--ink);} .text-espresso{color:var(--espresso);}
+  .text-petrol{color:var(--petrol);} .text-amber{color:var(--amber);}
+  .text-cream{color:var(--cream);} .text-moss{color:var(--moss);}
+  .bg-cream{background:var(--cream);} .bg-cream-2{background:var(--cream-2);}
+  .bg-ink{background:var(--ink);} .bg-espresso{background:var(--espresso);}
+  .bg-petrol{background:var(--petrol);} .bg-petrol-2{background:var(--petrol-2);}
+  .bg-amber{background:var(--amber);} .bg-sand{background:var(--sand);}
+  .bg-moss{background:var(--moss);}
+  .border-petrol{border-color:var(--petrol);} .border-amber{border-color:var(--amber);}
+  .border-sand{border-color:var(--sand);} .border-cream{border-color:var(--cream);}
+  .grain::before{
+    content:'';position:absolute;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity:.18;pointer-events:none;mix-blend-mode:overlay;
+  }
+  .hero-img{
+    background-image:
+      linear-gradient(180deg,rgba(14,59,67,0.25) 0%,rgba(14,59,67,0.45) 45%,rgba(14,59,67,0.88) 100%),
+      url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1800&q=80');
+    background-size:cover;background-position:center 40%;
+  }
+  .btn-primary{background:var(--amber);color:var(--ink);transition:all .25s ease;}
+  .btn-primary:hover{background:var(--amber-2);transform:translateY(-1px);box-shadow:0 12px 24px -10px rgba(200,112,74,.6);}
+  .btn-ghost{border:1px solid rgba(244,236,221,.4);color:var(--cream);transition:all .25s ease;}
+  .btn-ghost:hover{background:rgba(244,236,221,.12);border-color:rgba(244,236,221,.7);}
+  .btn-petrol{background:var(--petrol);color:var(--cream);transition:all .25s ease;}
+  .btn-petrol:hover{background:var(--petrol-2);transform:translateY(-1px);}
+  .card-hover{transition:transform .35s cubic-bezier(.2,.7,.3,1),box-shadow .35s ease;}
+  .card-hover:hover{transform:translateY(-6px);box-shadow:0 26px 50px -24px rgba(14,59,67,.35);}
+  .ticker{animation:ticker 38s linear infinite;}
+  @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+  .nav-link{position:relative;}
+  .nav-link::after{content:'';position:absolute;left:0;bottom:-5px;width:0;height:1px;background:var(--amber);transition:width .3s ease;}
+  .nav-link:hover::after{width:100%;}
+  .price-popular{box-shadow:0 30px 70px -30px rgba(14,59,67,.45);}
+  .blend-img-1{background-image:url('https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=800&q=80');background-size:cover;background-position:center;}
+  .blend-img-2{background-image:url('https://images.unsplash.com/photo-1559525839-d9acfd0b3f3a?auto=format&fit=crop&w=800&q=80');background-size:cover;background-position:center;}
+  .blend-img-3{background-image:url('https://images.unsplash.com/photo-1610889556528-9a770e32642f?auto=format&fit=crop&w=800&q=80');background-size:cover;background-position:center;}
+  .story-img{background-image:url('https://images.unsplash.com/photo-1453614512568-c4024d13c247?auto=format&fit=crop&w=1200&q=80');background-size:cover;background-position:center;}
+  .cta-img{background-image:linear-gradient(135deg,rgba(14,59,67,.92) 0%,rgba(19,78,94,.88) 100%),url('https://images.unsplash.com/photo-1442975631115-c4f7b05b8a2c?auto=format&fit=crop&w=1600&q=80');background-size:cover;background-position:center;}
+  .dot-grid{background-image:radial-gradient(rgba(14,59,67,.18) 1px,transparent 1px);background-size:18px 18px;}
+  .vignette{box-shadow:inset 0 0 120px 30px rgba(14,59,67,.35);}
+  .marquee-pause:hover .ticker{animation-play-state:paused;}
+  details>summary{list-style:none;cursor:pointer;}
+  details>summary::-webkit-details-marker{display:none;}
+  .acc-icon{transition:transform .3s ease;}
+  details[open] .acc-icon{transform:rotate(45deg);}
+  .badge-rotate{animation:spin 18s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .flavor-canvas-wrap{position:relative;}
+  .flavor-canvas-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 100%,rgba(200,112,74,.08),transparent 60%);pointer-events:none;}
+  ::selection{background:var(--amber);color:var(--cream);}
+</style>
+</head>
+<body class="overflow-x-hidden">
+
+<!-- NAV -->
+<nav class="fixed top-0 inset-x-0 z-50 transition-all duration-300" id="nav">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-4 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2.5">
+      <span class="w-9 h-9 rounded-full bg-cream/15 backdrop-blur border border-cream/25 flex items-center justify-center">
+        <i class="fa-solid fa-water text-cream text-sm"></i>
+      </span>
+      <span class="font-display text-2xl font-semibold text-cream tracking-tight">Tidepool</span>
+    </a>
+    <div class="hidden md:flex items-center gap-9 text-sm text-cream/90">
+      <a href="#blends" class="nav-link">The Blends</a>
+      <a href="#flavor" class="nav-link">Flavor Profile</a>
+      <a href="#pricing" class="nav-link">Pricing</a>
+      <a href="#stories" class="nav-link">Stories</a>
+    </div>
+    <a href="#pricing" class="hidden md:inline-flex items-center gap-2 bg-amber text-ink px-5 py-2.5 rounded-full text-sm font-medium hover:bg-[var(--amber-2)] transition">
+      Start subscription <i class="fa-solid fa-arrow-right text-xs"></i>
+    </a>
+    <button class="md:hidden text-cream text-xl" id="menuBtn"><i class="fa-solid fa-bars"></i></button>
+  </div>
+  <div id="mobileMenu" class="hidden md:hidden bg-petrol border-t border-cream/10">
+    <div class="px-6 py-4 flex flex-col gap-4 text-cream/90 text-sm">
+      <a href="#blends">The Blends</a>
+      <a href="#flavor">Flavor Profile</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#stories">Stories</a>
+      <a href="#pricing" class="bg-amber text-ink px-4 py-2 rounded-full text-center font-medium">Start subscription</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero-img relative min-h-screen flex flex-col justify-end grain vignette">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 pb-20 pt-32 w-full relative z-10">
+    <div class="max-w-3xl">
+      <div class="inline-flex items-center gap-2 bg-cream/10 backdrop-blur-md border border-cream/20 rounded-full px-4 py-1.5 mb-7">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber animate-pulse"></span>
+        <span class="text-cream/90 text-xs tracking-[0.18em] uppercase">Fresh roast shipped every Tuesday</span>
+      </div>
+      <h1 class="font-display text-cream text-5xl sm:text-6xl lg:text-7xl font-light leading-[1.02] tracking-tight">
+        Coffee with <em class="italic font-normal text-amber">depth</em>,<br>
+        pulled from the <span class="font-semibold">tide line.</span>
+      </h1>
+      <p class="text-cream/80 text-lg mt-7 max-w-xl leading-relaxed">
+        Single-origin beans, micro-roasted in 12-kilo batches on the Oregon coast and subscription-shipped within 48 hours of roast. Never older than a week when it reaches your counter.
+      </p>
+      <div class="flex flex-wrap items-center gap-4 mt-9">
+        <a href="#pricing" class="btn-primary inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-medium">
+          Build your plan <i class="fa-solid fa-arrow-right text-xs"></i>
+        </a>
+        <a href="#flavor" class="btn-ghost inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-medium">
+          <i class="fa-solid fa-mug-hot text-sm"></i> Taste the house blend
+        </a>
+      </div>
+      <div class="flex flex-wrap items-center gap-x-7 gap-y-3 mt-12 text-cream/70 text-sm">
+        <div class="flex items-center gap-2"><i class="fa-solid fa-leaf text-amber"></i> Direct trade</div>
+        <div class="flex items-center gap-2"><i class="fa-solid fa-fire text-amber"></i> Roasted to order</div>
+        <div class="flex items-center gap-2"><i class="fa-solid fa-truck-fast text-amber"></i> Free shipping over $25</div>
+        <div class="flex items-center gap-2"><i class="fa-solid fa-seedling text-amber"></i> Skip or pause anytime</div>
+      </div>
+    </div>
+  </div>
+  <!-- corner badge -->
+  <div class="absolute top-28 right-8 lg:right-16 hidden sm:block z-10">
+    <div class="relative w-28 h-28 lg:w-32 lg:h-32">
+      <svg class="badge-rotate w-full h-full" viewBox="0 0 100 100">
+        <defs>
+          <path id="circle" d="M 50,50 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"/>
+        </defs>
+        <text class="font-display" font-size="9" fill="#F4ECDD" letter-spacing="2">
+          <textPath href="#circle">FRESH ROAST • TIDEPOOL COFFEE • EST 2019 • </textPath>
+        </text>
+      </svg>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <i class="fa-solid fa-anchor text-cream text-xl"></i>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- TICKER -->
+<div class="bg-petrol text-cream/80 py-4 overflow-hidden border-y border-petrol-2 marquee-pause">
+  <div class="flex whitespace-nowrap ticker font-display italic text-lg">
+    <div class="flex items-center gap-10 px-5">
+      <span>Ethiopia Yirgacheffe</span><span class="text-amber">✦</span>
+      <span>Colombia Huila</span><span class="text-amber">✦</span>
+      <span>Guatemala Antigua</span><span class="text-amber">✦</span>
+      <span>Kenya Nyeri AA</span><span class="text-amber">✦</span>
+      <span>Costa Rica Tarrazú</span><span class="text-amber">✦</span>
+      <span>Panama Geisha</span><span class="text-amber">✦</span>
+      <span>Burundi Kayanza</span><span class="text-amber">✦</span>
+      <span>Rwanda Bourbon</span><span class="text-amber">✦</span>
+    </div>
+    <div class="flex items-center gap-10 px-5" aria-hidden="true">
+      <span>Ethiopia Yirgacheffe</span><span class="text-amber">✦</span>
+      <span>Colombia Huila</span><span class="text-amber">✦</span>
+      <span>Guatemala Antigua</span><span class="text-amber">✦</span>
+      <span>Kenya Nyeri AA</span><span class="text-amber">✦</span>
+      <span>Costa Rica Tarrazú</span><span class="text-amber">✦</span>
+      <span>Panama Geisha</span><span class="text-amber">✦</span>
+      <span>Burundi Kayanza</span><span class="text-amber">✦</span>
+      <span>Rwanda Bourbon</span><span class="text-amber">✦</span>
+    </div>
+  </div>
+</div>
+
+<!-- BLENDS -->
+<section id="blends" class="py-24 lg:py-32 relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16 reveal">
+      <div class="max-w-2xl">
+        <span class="text-amber text-sm tracking-[0.2em] uppercase font-medium">The lineup</span>
+        <h2 class="font-display text-4xl lg:text-5xl font-light text-espresso mt-3 leading-tight">
+          Three roasts, <em class="italic">one coastline.</em>
+        </h2>
+      </div>
+      <p class="text-espresso/70 max-w-md leading-relaxed">
+        Each blend is built around a single origin and named for a place on the shore where we roast. Rotate between them, or let them cycle automatically with your subscription.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <!-- Driftwood -->
+      <article class="card-hover bg-cream-2 rounded-2xl overflow-hidden border border-sand/60 reveal">
+        <div class="blend-img-1 h-64 relative">
+          <div class="absolute inset-0 bg-gradient-to-t from-espresso/40 to-transparent"></div>
+          <span class="absolute top-4 left-4 bg-cream/95 text-espresso text-xs font-medium px-3 py-1 rounded-full">Light roast</span>
+        </div>
+        <div class="p-7">
+          <div class="flex items-baseline justify-between mb-2">
+            <h3 class="font-display text-2xl font-semibold text-espresso">Driftwood</h3>
+            <span class="text-amber font-display text-lg">$18</span>
+          </div>
+          <p class="text-espresso/70 text-sm leading-relaxed mb-5">
+            Bright and briny. Ethiopian Yirgacheffe washed process — jasmine, bergamot, white peach. A morning swim.
+          </p>
+          <div class="flex items-center gap-4 text-xs text-espresso/60 mb-5">
+            <span><i class="fa-solid fa-temperature-half mr-1 text-amber"></i> Light</span>
+            <span><i class="fa-solid fa-droplet mr-1 text-amber"></i> Washed</span>
+            <span><i class="fa-solid fa-mountain mr-1 text-amber"></i> 1900m</span>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-sand/60">
+            <div class="flex items-center gap-1 text-amber text-xs">
+              <i class="fa-solid fa-circle text-[6px]"></i>
+              <i class="fa-solid fa-circle text-[6px]"></i>
+              <i class="fa-solid fa-circle text-[6px]"></i>
+              <i class="fa-regular fa-circle text-[6px] text-sand"></i>
+              <i class="fa-regular fa-circle text-[6px] text-sand"></i>
+              <span class="ml-2 text-espresso/50">Acidity 3/5</span>
+            </div>
+            <a href="#pricing" class="text-espresso text-sm font-medium hover:text-amber transition">Choose →</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Tidepool -->
+      <article class="card-hover bg-espresso text-cream rounded-2xl overflow-hidden relative reveal" style="transition-delay:.1s">
+        <div class="absolute top-4 right-4 z-10 bg-amber text-ink text-xs font-semibold px-3 py-1 rounded-full">House blend</div>
+        <div class="blend-img-2 h-64 relative">
+          <div class="absolute inset-0 bg-gradient-to-t from-espresso to-transparent"></div>
+          <span class="absolute top-4 left-4 bg-cream/95 text-espresso text-xs font-medium px-3 py-1 rounded-full">Medium roast</span>
+        </div>
+        <div class="p-7">
+          <div class="flex items-baseline justify-between mb-2">
+            <h3 class="font-display text-2xl font-semibold">Tidepool</h3>
+            <span class="text-amber font-display text-lg">$22</span>
+          </div>
+          <p class="text-cream/70 text-sm leading-relaxed mb-5">
+            Balanced and round. Colombia Huila + Guatemala Antigua — milk chocolate, dried fig, brown sugar, walnut. Our daily drinker.
+          </p>
+          <div class="flex items-center gap-4 text-xs text-cream/60 mb-5">
+            <span><i class="fa-solid fa-temperature-half mr-1 text-amber"></i> Medium</span>
+            <span><i class="fa-solid fa-droplet mr-1 text-amber"></i> Washed</span>
+            <span><i class="fa-solid fa-mountain mr-1 text-amber"></i> 1700m</span>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-cream/15">
+            <div class="flex items-center gap-1 text-amber text-xs">
+              <i class="fa-solid fa-circle text-[6px]"></i>
+              <i class="fa-solid fa-circle text-[6px]"></i>
+              <i class="fa-solid fa-circle text-[6px]"></i>
+              <i class="fa-solid fa-circle text-[6px]"></i>
+              <i class="fa-regular fa-circle text-[6px] text-cream/25"></i>
+              <span class="ml-2 text-cream/50">Acidity 4/5</span>
+            </div>
+            <a href="#flavor" class="text-cream text-sm font-medium hover:text-amber transition">Profile →</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Abyss -->
+      <article class="card-hover bg-cream-2 rounded-2xl overflow-hidden border border-sand/60 reveal" style="transition-delay:.2s">
+        <div class="blend-img-3 h-64 relative">
+          <div class="absolute inset-0 bg-gradient-to-t from-espresso/50 to-transparent"></div>
+          <span class="absolute top-4 left-4 bg-cream/95 text-espresso text-xs font-medium px-3 py-1 rounded-full">Dark roast</span>
+        </div>
+        <div class="p-7">
+          <div class="flex items-baseline justify-between mb-2">
+            <h3 class="font-display text-2xl font-semibold text-espresso">Abyss</h3>
+            <span class="text-amber font-display text-lg">$24</span>
+          </div>
+          <p class="text-espresso/70 text-sm leading-relaxed mb-5">
+            Deep and brooding. Sumatra Mandheling natural — dark cocoa, cedar, tobacco, black cherry. For espresso and slow mornings.
+          </p>
+          <div class="flex items-center gap-4 text-xs text-espresso/60 mb-5">
+            <span><i class="fa-solid fa-temperature-half mr-1 text-amber"></i> Dark</span>
+            <span><i class="fa-solid fa-droplet mr-1 text-amber"></i> Natural</span>
+            <span><i class="fa-solid fa-mountain mr-1 text-amber"></i> 1500m</span>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-sand/60">
+            <div class="flex items-center gap-1 text-amber text-xs">
+              <i class="fa-solid fa-circle text-[6px]"></i>
+              <i class="fa-solid fa-circle text-[6px]"></i>
+              <i class="fa-regular fa-circle text-[6px] text-sand"></i>
+              <i class="fa-regular fa-circle text-[6px] text-sand"></i>
+              <i class="fa-regular fa-circle text-[6px] text-sand"></i>
+              <span class="ml-2 text-espresso/50">Acidity 2/5</span>
+            </div>
+            <a href="#pricing" class="text-espresso text-sm font-medium hover:text-amber transition">Choose →</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- FLAVOR PROFILE -->
+<section id="flavor" class="py-24 lg:py-32 bg-petrol relative grain overflow-hidden">
+  <div class="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-amber/10 blur-3xl"></div>
+  <div class="absolute -bottom-32 -left-20 w-96 h-96 rounded-full bg-teal/30 blur-3xl"></div>
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 relative">
+    <div class="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+      <div class="reveal">
+        <span class="text-amber text-sm tracking-[0.2em] uppercase font-medium">Cupping notes</span>
+        <h2 class="font-display text-4xl lg:text-5xl font-light text-cream mt-3 leading-tight">
+          The Tidepool <em class="italic">house blend,</em> broken down.
+        </h2>
+        <p class="text-cream/70 text-lg mt-6 leading-relaxed max-w-lg">
+          We dial in every blend on a Probat L12 drum roaster and cup it blind against the previous week's batch. Below is the sensory profile of our current house blend — scored on a 10-point scale across four axes.
+        </p>
+        <div class="mt-9 space-y-4">
+          <div class="flex items-start gap-4">
+            <span class="w-10 h-10 rounded-full bg-cream/10 border border-cream/15 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-lemon text-amber text-sm"></i>
+            </span>
+            <div>
+              <div class="text-cream font-medium">Acidity — 6/10</div>
+              <div class="text-cream/60 text-sm">Bright apple-skin acidity that lifts the cup without turning sharp.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <span class="w-10 h-10 rounded-full bg-cream/10 border border-cream/15 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-mountain text-amber text-sm"></i>
+            </span>
+            <div>
+              <div class="text-cream font-medium">Body — 8/10</div>
+              <div class="text-cream/60 text-sm">Syrupy, coating mouthfeel — holds up to milk without disappearing.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <span class="w-10 h-10 rounded-full bg-cream/10 border border-cream/15 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-cube text-amber text-sm"></i>
+            </span>
+            <div>
+              <div class="text-cream font-medium">Sweetness — 7/10</div>
+              <div class="text-cream/60 text-sm">Brown sugar and dried fig. No bitterness chasing it down.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <span class="w-10 h-10 rounded-full bg-cream/10 border border-cream/15 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-spa text-amber text-sm"></i>
+            </span>
+            <div>
+              <div class="text-cream font-medium">Aroma — 9/10</div>
+              <div class="text-cream/60 text-sm">Toasted walnut, cocoa nib, and a wisp of sea air from the coast.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal" style="transition-delay:.15s">
+        <div class="bg-cream rounded-3xl p-7 lg:p-9 relative">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <div class="text-xs text-espresso/50 tracking-[0.18em] uppercase mb-1">Sensory chart</div>
+              <div class="font-display text-2xl font-semibold text-espresso">Tidepool House Blend</div>
+            </div>
+            <div class="text-right">
+              <div class="font-display text-3xl font-semibold text-amber leading-none">87</div>
+              <div class="text-xs text-espresso/50 mt-1">Cupping score</div>
+            </div>
+          </div>
+          <div class="flavor-canvas-wrap">
+            <canvas id="flavorChart" height="260"></canvas>
+          </div>
+          <div class="grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-sand">
+            <div class="flex items-center gap-2 text-xs text-espresso/70"><span class="w-3 h-3 rounded-sm bg-amber"></span> Current batch</div>
+            <div class="flex items-center gap-2 text-xs text-espresso/70"><span class="w-3 h-3 rounded-sm bg-petrol/30"></span> Category average</div>
+          </div>
+          <div class="mt-5 flex items-center gap-3 text-xs text-espresso/50">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Scored by Q-grader, week of roast. Updated weekly.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="py-24 lg:py-32 relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+      <span class="text-amber text-sm tracking-[0.2em] uppercase font-medium">Subscription</span>
+      <h2 class="font-display text-4xl lg:text-5xl font-light text-espresso mt-3 leading-tight">
+        Choose your <em class="italic">tide.</em>
+      </h2>
+      <p class="text-espresso/70 mt-5 leading-relaxed">
+        Pause, skip, or cancel from your dashboard anytime. Every plan ships free, roasts to order, and arrives within four days of leaving the drum.
+      </p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <!-- Driftwood plan -->
+      <div class="card-hover bg-cream-2 rounded-3xl p-8 border border-sand/60 flex flex-col reveal">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="w-8 h-8 rounded-full bg-sand/60 flex items-center justify-center"><i class="fa-solid fa-water text-espresso text-xs"></i></span>
+          <h3 class="font-display text-2xl font-semibold text-espresso">Driftwood</h3>
+        </div>
+        <p class="text-espresso/60 text-sm mb-6">For the solo sipper — one bag, every other week.</p>
+        <div class="flex items-baseline gap-1 mb-1">
+          <span class="font-display text-5xl font-semibold text-espresso">$18</span>
+          <span class="text-espresso/50 text-sm">/ bag</span>
+        </div>
+        <div class="text-espresso/50 text-sm mb-7">Billed biweekly · ~$36/mo</div>
+        <ul class="space-y-3 text-sm text-espresso/80 mb-8 flex-1">
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> 12oz bag, biweekly</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Choose any single blend</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Whole bean or ground</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Skip anytime</li>
+          <li class="flex items-start gap-3 text-espresso/40"><i class="fa-solid fa-xmark mt-0.5"></i> Early access micro-lots</li>
+          <li class="flex items-start gap-3 text-espresso/40"><i class="fa-solid fa-xmark mt-0.5"></i> Tasting notes card</li>
+        </ul>
+        <a href="#" class="block text-center py-3.5 rounded-full border border-espresso/20 text-espresso font-medium hover:bg-espresso hover:text-cream transition">Start Driftwood</a>
+      </div>
+
+      <!-- Tidepool plan (popular) -->
+      <div class="card-hover price-popular bg-espresso text-cream rounded-3xl p-8 flex flex-col relative lg:-mt-4 lg:mb-0 reveal" style="transition-delay:.1s">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber text-ink text-xs font-semibold px-4 py-1 rounded-full">Most popular</div>
+        <div class="flex items-center gap-3 mb-1 mt-2">
+          <span class="w-8 h-8 rounded-full bg-amber/20 flex items-center justify-center"><i class="fa-solid fa-anchor text-amber text-xs"></i></span>
+          <h3 class="font-display text-2xl font-semibold">Tidepool</h3>
+        </div>
+        <p class="text-cream/60 text-sm mb-6">For the daily drinker — two bags, weekly rotation.</p>
+        <div class="flex items-baseline gap-1 mb-1">
+          <span class="font-display text-5xl font-semibold text-amber">$32</span>
+          <span class="text-cream/50 text-sm">/ delivery</span>
+        </div>
+        <div class="text-cream/50 text-sm mb-7">Billed weekly · ~$64/mo</div>
+        <ul class="space-y-3 text-sm text-cream/85 mb-8 flex-1">
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> 2 × 12oz bags, weekly</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Rotate all three blends</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Whole bean or ground</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Skip or pause anytime</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Early access micro-lots</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Tasting notes card</li>
+        </ul>
+        <a href="#" class="block text-center py-3.5 rounded-full bg-amber text-ink font-medium hover:bg-[var(--amber-2)] transition">Start Tidepool</a>
+      </div>
+
+      <!-- Abyss plan -->
+      <div class="card-hover bg-cream-2 rounded-3xl p-8 border border-sand/60 flex flex-col reveal" style="transition-delay:.2s">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="w-8 h-8 rounded-full bg-sand/60 flex items-center justify-center"><i class="fa-solid fa-compass text-espresso text-xs"></i></span>
+          <h3 class="font-display text-2xl font-semibold text-espresso">Abyss</h3>
+        </div>
+        <p class="text-espresso/60 text-sm mb-6">For the deep diver — three bags, weekly, with rarities.</p>
+        <div class="flex items-baseline gap-1 mb-1">
+          <span class="font-display text-5xl font-semibold text-espresso">$48</span>
+          <span class="text-espresso/50 text-sm">/ delivery</span>
+        </div>
+        <div class="text-espresso/50 text-sm mb-7">Billed weekly · ~$96/mo</div>
+        <ul class="space-y-3 text-sm text-espresso/80 mb-8 flex-1">
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> 3 × 12oz bags, weekly</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Includes micro-lot drops</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Whole bean or ground</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Skip or pause anytime</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Early access micro-lots</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-check text-amber mt-0.5"></i> Tasting notes card + origin map</li>
+        </ul>
+        <a href="#" class="block text-center py-3.5 rounded-full border border-espresso/20 text-espresso font-medium hover:bg-espresso hover:text-cream transition">Start Abyss</a>
+      </div>
+    </div>
+
+    <div class="text-center mt-12 text-espresso/50 text-sm reveal">
+      <i class="fa-solid fa-shield-halved mr-2 text-amber"></i>
+      30-day money-back guarantee · No contracts · Cancel from your inbox
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="stories" class="py-24 lg:py-32 bg-cream-2 relative overflow-hidden">
+  <div class="dot-grid absolute inset-0 opacity-40"></div>
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 relative">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-14 reveal">
+      <div>
+        <span class="text-amber text-sm tracking-[0.2em] uppercase font-medium">From the crew</span>
+        <h2 class="font-display text-4xl lg:text-5xl font-light text-espresso mt-3 leading-tight">
+          What the <em class="italic">regulars</em> are saying.
+        </h2>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex -space-x-3">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80" class="w-11 h-11 rounded-full border-2 border-cream object-cover" alt="">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80" class="w-11 h-11 rounded-full border-2 border-cream object-cover" alt="">
+          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=80&q=80" class="w-11 h-11 rounded-full border-2 border-cream object-cover" alt="">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80" class="w-11 h-11 rounded-full border-2 border-cream object-cover" alt="">
+        </div>
+        <div class="text-sm">
+          <div class="flex items-center gap-1 text-amber">
+            <i class="fa-solid fa-star text-xs"></i>
+            <i class="fa-solid fa-star text-xs"></i>
+            <i class="fa-solid fa-star text-xs"></i>
+            <i class="fa-solid fa-star text-xs"></i>
+            <i class="fa-solid fa-star text-xs"></i>
+            <span class="text-espresso font-medium ml-1">4.9</span>
+          </div>
+          <div class="text-espresso/60 text-xs mt-0.5">2,400+ active subscribers</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <figure class="card-hover bg-cream rounded-2xl p-7 border border-sand/60 reveal">
+        <div class="flex items-center gap-1 text-amber mb-4">
+          <i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i>
+        </div>
+        <blockquote class="font-display text-xl text-espresso leading-snug mb-6">
+          "The Tidepool blend is the first coffee that made me put down the cream. It's that balanced. I've been a subscriber for 14 months and not a single bag has been off."
+        </blockquote>
+        <figcaption class="flex items-center gap-3 pt-5 border-t border-sand/60">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" class="w-12 h-12 rounded-full object-cover" alt="">
+          <div>
+            <div class="font-medium text-espresso text-sm">Mara Whitfield</div>
+            <div class="text-espresso/55 text-xs">Subscriber since 2023 · Portland</div>
+          </div>
+        </figcaption>
+      </figure>
+
+      <figure class="card-hover bg-cream rounded-2xl p-7 border border-sand/60 reveal" style="transition-delay:.1s">
+        <div class="flex items-center gap-1 text-amber mb-4">
+          <i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i>
+        </div>
+        <blockquote class="font-display text-xl text-espresso leading-snug mb-6">
+          "I run a small café in Astoria and switched our house espresso to Abyss six months ago. Customers ask about it daily. The consistency bag-to-bag is unreal for a small roaster."
+        </blockquote>
+        <figcaption class="flex items-center gap-3 pt-5 border-t border-sand/60">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" class="w-12 h-12 rounded-full object-cover" alt="">
+          <div>
+            <div class="font-medium text-espresso text-sm">Devon Aoki</div>
+            <div class="text-espresso/55 text-xs">Café owner · Astoria, OR</div>
+          </div>
+        </figcaption>
+      </figure>
+
+      <figure class="card-hover bg-cream rounded-2xl p-7 border border-sand/60 reveal" style="transition-delay:.2s">
+        <div class="flex items-center gap-1 text-amber mb-4">
+          <i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star-half-stroke text-xs"></i>
+        </div>
+        <blockquote class="font-display text-xl text-espresso leading-snug mb-6">
+          "What hooked me was the aroma — it actually smells like the coast. The tasting notes card each week turned my morning routine into a tiny ritual. Worth every penny."
+        </blockquote>
+        <figcaption class="flex items-center gap-3 pt-5 border-t border-sand/60">
+          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&q=80" class="w-12 h-12 rounded-full object-cover" alt="">
+          <div>
+            <div class="font-medium text-espresso text-sm">Priya Ramanathan</div>
+            <div class="text-espresso/55 text-xs">Home barista · Brooklyn</div>
+          </div>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- STORY STRIP -->
+<section class="py-24 lg:py-32 bg-espresso text-cream relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 grid lg:grid-cols-2 gap-14 items-center">
+    <div class="reveal">
+      <span class="text-amber text-sm tracking-[0.2em] uppercase font-medium">Our shore</span>
+      <h2 class="font-display text-4xl lg:text-5xl font-light mt-3 leading-tight">
+        Roasted 400 feet <em class="italic">from the Pacific.</em>
+      </h2>
+      <p class="text-cream/70 text-lg mt-6 leading-relaxed max-w-lg">
+        Our 800-square-foot roastery sits in a converted cannery in Newport, Oregon. We import green coffee from twelve farms across the equatorial belt, then roast it on a restored 1970s Probat — the same week it ships.
+      </p>
+      <div class="grid grid-cols-3 gap-6 mt-10 max-w-md">
+        <div>
+          <div class="font-display text-3xl font-semibold text-amber">12kg</div>
+          <div class="text-cream/60 text-xs mt-1">Batch size</div>
+        </div>
+        <div>
+          <div class="font-display text-3xl font-semibold text-amber">48hr</div>
+          <div class="text-cream/60 text-xs mt-1">Roast to ship</div>
+        </div>
+        <div>
+          <div class="font-display text-3xl font-semibold text-amber">12</div>
+          <div class="text-cream/60 text-xs mt-1">Partner farms</div>
+        </div>
+      </div>
+      <a href="#" class="inline-flex items-center gap-2 mt-9 text-amber font-medium hover:gap-3 transition-all">
+        Read our sourcing story <i class="fa-solid fa-arrow-right text-xs"></i>
+      </a>
+    </div>
+    <div class="story-img h-[420px] lg:h-[520px] rounded-3xl reveal" style="transition-delay:.15s"></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-img py-24 lg:py-32 relative grain">
+  <div class="max-w-3xl mx-auto px-6 lg:px-10 text-center relative z-10">
+    <h2 class="font-display text-4xl lg:text-6xl font-light text-cream leading-tight reveal">
+      Pull your first <em class="italic text-amber">tide.</em>
+    </h2>
+    <p class="text-cream/75 text-lg mt-6 leading-relaxed reveal" style="transition-delay:.1s">
+      Fresh-roasted coffee, on your doorstep within four days of leaving the drum. Build your plan in under two minutes — pause or cancel anytime.
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-4 mt-9 reveal" style="transition-delay:.2s">
+      <a href="#pricing" class="btn-primary inline-flex items-center gap-2 px-8 py-4 rounded-full font-medium">
+        Start subscription <i class="fa-solid fa-arrow-right text-xs"></i>
+      </a>
+      <a href="#" class="btn-ghost inline-flex items-center gap-2 px-8 py-4 rounded-full font-medium">
+        <i class="fa-solid fa-gift text-sm"></i> Gift a subscription
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-petrol text-cream/70 pt-16 pb-8">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="grid md:grid-cols-4 gap-10 mb-12">
+      <div class="md:col-span-1">
+        <div class="flex items-center gap-2.5 mb-4">
+          <span class="w-9 h-9 rounded-full bg-cream/10 border border-cream/20 flex items-center justify-center">
+            <i class="fa-solid fa-water text-cream text-sm"></i>
+          </span>
+          <span class="font-display text-2xl font-semibold text-cream">Tidepool</span>
+        </div>
+        <p class="text-sm leading-relaxed text-cream/60 max-w-xs">
+          Small-batch specialty coffee, roasted on the Oregon coast and shipped fresh.
+        </p>
+        <div class="flex items-center gap-3 mt-5">
+          <a href="#" class="w-9 h-9 rounded-full bg-cream/10 hover:bg-amber hover:text-ink flex items-center justify-center transition"><i class="fa-brands fa-instagram text-sm"></i></a>
+          <a href="#" class="w-9 h-9 rounded-full bg-cream/10 hover:bg-amber hover:text-ink flex items-center justify-center transition"><i class="fa-brands fa-x-twitter text-sm"></i></a>
+          <a href="#" class="w-9 h-9 rounded-full bg-cream/10 hover:bg-amber hover:text-ink flex items-center justify-center transition"><i class="fa-brands fa-spotify text-sm"></i></a>
+          <a href="#" class="w-9 h-9 rounded-full bg-cream/10 hover:bg-amber hover:text-ink flex items-center justify-center transition"><i class="fa-solid fa-envelope text-sm"></i></a>
+        </div>
+      </div>
+      <div>
+        <div class="text-cream font-medium text-sm mb-4">Coffee</div>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="#blends" class="hover:text-amber transition">The blends</a></li>
+          <li><a href="#flavor" class="hover:text-amber transition">Flavor profile</a></li>
+          <li><a href="#pricing" class="hover:text-amber transition">Subscription</a></li>
+          <li><a href="#" class="hover:text-amber transition">Gift cards</a></li>
+          <li><a href="#" class="hover:text-amber transition">Wholesale</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="text-cream font-medium text-sm mb-4">Roastery</div>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="#" class="hover:text-amber transition">Our story</a></li>
+          <li><a href="#" class="hover:text-amber transition">Sourcing</a></li>
+          <li><a href="#" class="hover:text-amber transition">Visit Newport</a></li>
+          <li><a href="#" class="hover:text-amber transition">Journal</a></li>
+          <li><a href="#" class="hover:text-amber transition">Careers</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="text-cream font-medium text-sm mb-4">Stay in the loop</div>
+        <p class="text-sm text-cream/60 mb-3">Weekly origin notes, brew tips, and early access to micro-lots.</p>
+        <form class="flex gap-2" onsubmit="event.preventDefault();this.querySelector('input').value='';this.querySelector('button').innerHTML='<i class=\'fa-solid fa-check\'></i>';">
+          <input type="email" required placeholder="your@email.com" class="flex-1 bg-cream/10 border border-cream/20 rounded-full px-4 py-2.5 text-sm text-cream placeholder-cream/40 focus:outline-none focus:border-amber">
+          <button type="submit" class="bg-amber text-ink w-10 h-10 rounded-full flex items-center justify-center hover:bg-[var(--amber-2)] transition flex-shrink-0"><i class="fa-solid fa-arrow-right text-xs"></i></button>
+        </form>
+      </div>
+    </div>
+    <div class="pt-8 border-t border-cream/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-cream/50">
+      <div>© 2024 Tidepool Coffee Roasters · Newport, Oregon</div>
+      <div class="flex items-center gap-5">
+        <a href="#" class="hover:text-amber transition">Privacy</a>
+        <a href="#" class="hover:text-amber transition">Terms</a>
+        <a href="#" class="hover:text-amber transition">Shipping</a>
+        <a href="#" class="hover:text-amber transition">FAQ</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Mobile menu
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  menuBtn?.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+
+  // Nav background on scroll
+  const nav = document.getElementById('nav');
+  const onScroll = () => {
+    if (window.scrollY > 40) {
+      nav.classList.add('bg-petrol','shadow-lg','backdrop-blur');
+    } else {
+      nav.classList.remove('bg-petrol','shadow-lg','backdrop-blur');
+    }
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Flavor profile chart
+  window.addEventListener('load', () => {
+    const ctx = document.getElementById('flavorChart');
+    if (!ctx || typeof Chart === 'undefined') return;
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Acidity', 'Body', 'Sweetness', 'Aroma'],
+        datasets: [
+          {
+            label: 'Tidepool House Blend',
+            data: [6, 8, 7, 9],
+            backgroundColor: '#C8704A',
+            hoverBackgroundColor: '#E08D5C',
+            borderRadius: 8,
+            borderSkipped: false,
+            barThickness: 38,
+          },
+          {
+            label: 'Category average',
+            data: [5, 6, 5, 6],
+            backgroundColor: 'rgba(14,59,67,0.22)',
+            hoverBackgroundColor: 'rgba(14,59,67,0.35)',
+            borderRadius: 8,
+            borderSkipped: false,
+            barThickness: 38,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1A1410',
+            titleColor: '#F4ECDD',
+            bodyColor: '#F4ECDD',
+            titleFont: { family: 'Inter', size: 12, weight: '600' },
+            bodyFont: { family: 'Inter', size: 12 },
+            padding: 12,
+            cornerRadius: 8,
+            displayColors: true,
+            boxPadding: 4,
+            callbacks: {
+              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y}/10`
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 10,
+            grid: { color: 'rgba(26,20,16,0.06)', drawBorder: false },
+            ticks: {
+              color: 'rgba(26,20,16,0.45)',
+              font: { family: 'Inter', size: 11 },
+              stepSize: 2,
+              callback: (v) => v
+            },
+            border: { display: false }
+          },
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#1A1410',
+              font: { family: 'Inter', size: 13, weight: '500' }
+            },
+            border: { display: false }
+          }
+        },
+        animation: {
+          duration: 1100,
+          easing: 'easeOutQuart',
+          delay: (ctx) => ctx.type === 'data' && ctx.mode === 'default' ? ctx.dataIndex * 90 : 0
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>
