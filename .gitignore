@@ -1,8 +1,9 @@
 node_modules/
 
-# secrets — never commit
+# secrets — never commit (but keep the example template)
 .env
 .env.*
+!.env.example
 
 # scratch run output (curated copies are published under stress/)
 runs/

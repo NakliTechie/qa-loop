@@ -29,12 +29,15 @@ at 46,098 chars.
 
 ```bash
 npm run setup                                  # install deps + Chromium
+cp .env.example .env                           # then add your OPENAI_API_KEY
 
-# put CODER_MODEL / QA_MODEL / CODER_URL / QA_URL / OPENAI_API_KEY in a .env, then:
 npm run qa -- "a landing page for a coffee subscription"   # one prompt
 npm run stress                                 # a whole suite (suite.json) → runs/summary.md
 npm test                                       # no-API smoke tests
 ```
+
+Config lives in `.env` (gitignored) — see [`.env.example`](.env.example) for the variables
+(`OPENAI_API_KEY`, `CODER_URL`/`QA_URL`, `CODER_MODEL`/`QA_MODEL`, budgets).
 
 Provider-agnostic (OpenAI-compatible): point `CODER_URL` / `QA_URL` at OpenRouter, TokenRouter, or a
 self-hosted vLLM/SGLang endpoint to run entirely on your own GPUs. Flags: `--coder`, `--critic`,

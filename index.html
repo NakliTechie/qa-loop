@@ -189,12 +189,12 @@
   </ol>
 
   <h2>Run it yourself</h2>
-  <p>The harness is a small, modular TypeScript CLI — the engine is
-  <a href="https://github.com/NakliTechie/qa-loop/blob/main/src/loop.ts">src/loop.ts</a>, the command-line
-  front end is <a href="https://github.com/NakliTechie/qa-loop/blob/main/src/cli.ts">src/cli.ts</a>. It’s
-  provider-agnostic (OpenAI-compatible) — point it at OpenRouter, TokenRouter, or a self-hosted
-  vLLM/SGLang endpoint to run entirely on your own GPUs.</p>
+  <p>The harness is a small, modular TypeScript CLI — a render + coder + critic engine
+  (<code>src/loop.ts</code>) and a batch runner (<code>src/cli.ts</code>). It’s provider-agnostic
+  (OpenAI-compatible) — point it at OpenRouter, TokenRouter, or a self-hosted vLLM/SGLang endpoint to
+  run entirely on your own GPUs. <a href="https://github.com/NakliTechie/qa-loop">Full source on GitHub →</a></p>
   <pre><code>npm run setup                      # install deps + Chromium
+cp .env.example .env               # then add your API key
 
 # one prompt → runs/&lt;slug&gt;/ (page.html, screenshots, result.json):
 npm run qa -- "a landing page for a coffee subscription"
